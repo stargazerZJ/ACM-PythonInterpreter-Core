@@ -14,7 +14,7 @@
 #include <array>
 #include <algorithm>
 
-namespace sjtu {
+namespace high_precision {
 using num_t = unsigned long long;
 static constexpr unsigned kBaseN = 18;
 static constexpr std::array<num_t, kBaseN + 1> kBaseArray = []() {
@@ -45,8 +45,8 @@ class NTTBase {
   friend inline Int operator*(Int a, Int b);
 
   static inline constexpr void swap(Int &a, Int &b);
-  static inline constexpr Int powerMod(sjtu::NTTBase::Int a, unsigned b);
-  static inline constexpr Int getInverse(sjtu::NTTBase::Int a);
+  static inline constexpr Int powerMod(high_precision::NTTBase::Int a, unsigned b);
+  static inline constexpr Int getInverse(high_precision::NTTBase::Int a);
   static inline void calculateRev(size_t n);
   static inline void change(std::vector<Int> &x);
   static inline void ntt(std::vector<Int> &x, bool positive);
@@ -61,8 +61,8 @@ class NTTBase {
 class int2048 : public NTTBase {
  public:
   int2048();
-  int2048(long long);
-  int2048(const std::string &);
+  explicit int2048(long long);
+  explicit int2048(const std::string &);
   int2048(const int2048 &);
 
   [[nodiscard]] bool isZero() const;

@@ -4,9 +4,9 @@
 
 #include "include/int2048.h"
 
-sjtu::int2048::int2048() : sign_(0), num_(1, 0) {}
+high_precision::int2048::int2048() : sign_(0), num_(1, 0) {}
 
-sjtu::int2048::int2048(long long x) {
+high_precision::int2048::int2048(long long x) {
   if (x < 0) {
     sign_ = 1;
     x = -x;
@@ -24,7 +24,7 @@ sjtu::int2048::int2048(long long x) {
   }
 }
 
-sjtu::int2048::int2048(const std::string &s) {
+high_precision::int2048::int2048(const std::string &s) {
   if (s[0] == '-') {
     sign_ = 1;
   } else {
@@ -45,10 +45,10 @@ sjtu::int2048::int2048(const std::string &s) {
   }
   standardize();
 }
-void sjtu::int2048::read(const std::string &s) {
+void high_precision::int2048::read(const std::string &s) {
   *this = int2048(s);
 }
-void sjtu::int2048::standardize() {
+void high_precision::int2048::standardize() {
   while (!num_.empty() && num_.back() == 0) { // can be optimized
     num_.pop_back();
   }
@@ -60,10 +60,10 @@ void sjtu::int2048::standardize() {
     sign_ = 0;
   }
 }
-bool sjtu::int2048::isZero() const {
+bool high_precision::int2048::isZero() const {
   return num_.size() == 1 && num_[0] == 0;
 }
-std::string sjtu::int2048::toString() const {
+std::string high_precision::int2048::toString() const {
   std::string s;
   if (isZero()) {
     s.push_back('0');
@@ -80,25 +80,25 @@ std::string sjtu::int2048::toString() const {
   }
   return s;
 }
-void sjtu::int2048::print() const {
+void high_precision::int2048::print() const {
   std::cout << toString();
 }
-sjtu::int2048 sjtu::int2048::operator+() const {
+high_precision::int2048 high_precision::int2048::operator+() const {
   return *this;
 }
-sjtu::int2048 sjtu::int2048::operator-() const {
+high_precision::int2048 high_precision::int2048::operator-() const {
   int2048 tmp = *this;
   tmp.sign_ ^= 1;
   tmp.standardize();
   return tmp;
 }
-sjtu::int2048 &sjtu::int2048::operator=(const sjtu::int2048 &) = default;
-sjtu::int2048::int2048(const sjtu::int2048 &) = default;
+high_precision::int2048 &high_precision::int2048::operator=(const high_precision::int2048 &) = default;
+high_precision::int2048::int2048(const high_precision::int2048 &) = default;
 
-sjtu::int2048 &sjtu::int2048::plusOrMinus(const int2048 &other, bool minus) {
+high_precision::int2048 &high_precision::int2048::plusOrMinus(const int2048 &other, bool minus) {
   if (this == &other) {
     if (minus) {
-      *this = 0;
+      *this = int2048();
     } else {
       num_.push_back(0);
       num_t advance = 0;
@@ -177,64 +177,64 @@ sjtu::int2048 &sjtu::int2048::plusOrMinus(const int2048 &other, bool minus) {
   return *this;
 }
 
-sjtu::int2048 &sjtu::int2048::operator+=(const sjtu::int2048 &other) {
+high_precision::int2048 &high_precision::int2048::operator+=(const high_precision::int2048 &other) {
   return plusOrMinus(other, false);
 }
-sjtu::int2048 sjtu::operator+(sjtu::int2048 lhs, const sjtu::int2048 &rhs) {
+high_precision::int2048 high_precision::operator+(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
   return lhs.plusOrMinus(rhs, false);
 }
-sjtu::int2048 &sjtu::int2048::add(const sjtu::int2048 &other) {
+high_precision::int2048 &high_precision::int2048::add(const high_precision::int2048 &other) {
   return plusOrMinus(other, false);
 }
-sjtu::int2048 sjtu::add(sjtu::int2048 lhs, const sjtu::int2048 &rhs) {
+high_precision::int2048 high_precision::add(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
   return lhs.plusOrMinus(rhs, false);
 }
 
-sjtu::int2048 &sjtu::int2048::operator-=(const sjtu::int2048 &rhs) {
+high_precision::int2048 &high_precision::int2048::operator-=(const high_precision::int2048 &rhs) {
   return plusOrMinus(rhs, true);
 }
-sjtu::int2048 sjtu::operator-(sjtu::int2048 lhs, const sjtu::int2048 &rhs) {
+high_precision::int2048 high_precision::operator-(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
   return lhs.plusOrMinus(rhs, true);
 }
-sjtu::int2048 &sjtu::int2048::minus(const sjtu::int2048 &other) {
+high_precision::int2048 &high_precision::int2048::minus(const high_precision::int2048 &other) {
   return plusOrMinus(other, true);
 }
-sjtu::int2048 sjtu::minus(sjtu::int2048 lhs, const sjtu::int2048 &rhs) {
+high_precision::int2048 high_precision::minus(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
   return lhs.plusOrMinus(rhs, true);
 }
 
-size_t sjtu::int2048::size() const {
+size_t high_precision::int2048::size() const {
   return num_.size();
 }
-void sjtu::int2048::advancePlus(std::vector<sjtu::num_t>::iterator it) {
+void high_precision::int2048::advancePlus(std::vector<high_precision::num_t>::iterator it) {
   if (*it >= kBase) {
     *it -= kBase;
     *(it + 1) += 1;
   }
 }
-void sjtu::int2048::advanceMinus(std::vector<sjtu::num_t>::iterator it) {
+void high_precision::int2048::advanceMinus(std::vector<high_precision::num_t>::iterator it) {
   if (*it >= kBase) {
     *it += kBase;
     *(it + 1) -= 1;
   }
 }
-std::istream &sjtu::operator>>(std::istream &is, sjtu::int2048 &x) {
+std::istream &high_precision::operator>>(std::istream &is, high_precision::int2048 &x) {
   std::string s;
   is >> s;
   x.read(s);
   return is;
 }
-std::ostream &sjtu::operator<<(std::ostream &os, const sjtu::int2048 &x) {
+std::ostream &high_precision::operator<<(std::ostream &os, const high_precision::int2048 &x) {
   os << x.toString();
   return os;
 }
-bool sjtu::operator==(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs) {
+bool high_precision::operator==(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
   return lhs.sign_ == rhs.sign_ && lhs.num_ == rhs.num_;
 }
-bool sjtu::operator!=(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs) {
+bool high_precision::operator!=(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
   return !(lhs == rhs);
 }
-bool sjtu::operator<(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs) {
+bool high_precision::operator<(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
   if (lhs.sign_ != rhs.sign_) {
     return lhs.sign_ > rhs.sign_;
   }
@@ -251,18 +251,18 @@ bool sjtu::operator<(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs) {
   }
   return false;
 }
-bool sjtu::operator>(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs) {
+bool high_precision::operator>(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
   return rhs < lhs;
 }
-bool sjtu::operator<=(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs) {
+bool high_precision::operator<=(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
   return !(lhs > rhs);
 }
-bool sjtu::operator>=(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs) {
+bool high_precision::operator>=(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
   return !(lhs < rhs);
 }
-sjtu::int2048 sjtu::operator*(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs) {
+high_precision::int2048 high_precision::operator*(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
   if (lhs.isZero() || rhs.isZero()) {
-    return {0};
+    return {};
   }
   int2048 res;
   res.sign_ = lhs.sign_ ^ rhs.sign_;
@@ -270,19 +270,19 @@ sjtu::int2048 sjtu::operator*(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs
   res.standardize();
   return res;
 }
-sjtu::int2048 &sjtu::int2048::operator*=(const sjtu::int2048 &other) {
+high_precision::int2048 &high_precision::int2048::operator*=(const high_precision::int2048 &other) {
   return *this = *this * other;
 }
 
-void sjtu::binarySearch(const sjtu::int2048 &dividend,
-                        const sjtu::int2048 &divisor,
-                        sjtu::int2048 &quotient_approx,
-                        int left,
-                        int right) {
+void high_precision::binarySearch(const high_precision::int2048 &dividend,
+                                  const high_precision::int2048 &divisor,
+                                  high_precision::int2048 &quotient_approx,
+                                  int left,
+                                  int right) {
   if (left > right) {
     return;
   }
-  quotient_approx += left;
+  quotient_approx += int2048(left);
   int2048 tmp = quotient_approx * divisor;
   int max_range = right - left;
   int attempt = 1;
@@ -295,13 +295,13 @@ void sjtu::binarySearch(const sjtu::int2048 &dividend,
       ans += attempt;
     }
   }
-  quotient_approx += ans;
+  quotient_approx += int2048(ans);
 }
-sjtu::int2048 sjtu::multiplyExp10(const sjtu::int2048 &x, int exp) {
+high_precision::int2048 high_precision::multiplyExp10(const high_precision::int2048 &x, int exp) {
   if (exp == 0) {
     return x;
   }
-  sjtu::int2048 res;
+  high_precision::int2048 res;
   res.sign_ = x.sign_;
   if (exp > 0) {
     int shift = exp / kBaseN;
@@ -322,7 +322,7 @@ sjtu::int2048 sjtu::multiplyExp10(const sjtu::int2048 &x, int exp) {
     int shift = exp / kBaseN;
     size_t rem = exp % kBaseN;
     if (shift >= x.size()) {
-      return 0;
+      return {};
     }
     res.num_.resize(x.size() - shift, 0);
     auto lhs = res.num_.rbegin();
@@ -336,25 +336,25 @@ sjtu::int2048 sjtu::multiplyExp10(const sjtu::int2048 &x, int exp) {
   res.standardize();
   return res;
 }
-sjtu::int2048 sjtu::inverse(const sjtu::int2048 &x, int n) {
+high_precision::int2048 high_precision::inverse(const high_precision::int2048 &x, int n) {
   static_assert(kBaseN >= 4 && kBaseN <= 18, "Not implemented for this kBaseN");
   if (n + n <= kBaseN) {
-    return static_cast<long long>(kBaseArray[n + n] / x.num_[0]);
+    return int2048(static_cast<long long>(kBaseArray[n + n] / x.num_[0]));
   }
   int k = (n + 2) >> 1;
   int2048 a_k = inverse(multiplyExp10(x, k - n), k);
   int2048 a =
       multiplyInt(multiplyExp10(a_k, n - k), 2) - multiplyExp10(x * a_k * a_k, -2 * k);
-  binarySearch(multiplyExp10(1, 2 * n), x, a, -100, 100);
+  binarySearch(multiplyExp10(int2048(1), 2 * n), x, a, -100, 100);
   return a;
 }
-int sjtu::int2048::length() const {
+int high_precision::int2048::length() const {
   size_t leading_zeros =
       std::upper_bound(kBaseArray.begin(), kBaseArray.end(), num_.back()) - kBaseArray.begin();
   leading_zeros = kBaseN - leading_zeros;
   return size() * kBaseN - leading_zeros;
 }
-sjtu::int2048 sjtu::divide(sjtu::int2048 dividend, sjtu::int2048 divisor) {
+high_precision::int2048 high_precision::divide(high_precision::int2048 dividend, high_precision::int2048 divisor) {
   if (divisor.isZero()) {
     throw std::runtime_error("Divide by zero");
   }
@@ -373,26 +373,26 @@ sjtu::int2048 sjtu::divide(sjtu::int2048 dividend, sjtu::int2048 divisor) {
   binarySearch(dividend, divisor, quotient, -10, 10);
   return quotient;
 }
-sjtu::int2048 &sjtu::int2048::flipSign() {
+high_precision::int2048 &high_precision::int2048::flipSign() {
   sign_ ^= 1;
   return *this;
 }
-sjtu::int2048 &sjtu::int2048::operator/=(const sjtu::int2048 &rhs) {
+high_precision::int2048 &high_precision::int2048::operator/=(const high_precision::int2048 &rhs) {
   return *this = divide(*this, rhs);
 }
-sjtu::int2048 sjtu::operator/(const sjtu::int2048 &lhs, const sjtu::int2048 &rhs) {
+high_precision::int2048 high_precision::operator/(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
   return divide(lhs, rhs);
 }
-sjtu::int2048 &sjtu::int2048::operator%=(const sjtu::int2048 &rhs) {
+high_precision::int2048 &high_precision::int2048::operator%=(const high_precision::int2048 &rhs) {
   return *this -= *this / rhs * rhs;
 }
-sjtu::int2048 sjtu::operator%(sjtu::int2048 lhs, const sjtu::int2048 &rhs) {
+high_precision::int2048 high_precision::operator%(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
   return lhs %= rhs;
 }
-sjtu::int2048 sjtu::multiplyInt(sjtu::int2048 lhs, int rhs) {
+high_precision::int2048 high_precision::multiplyInt(high_precision::int2048 lhs, int rhs) {
   static_assert(kBaseN <= 25, "Not implemented for this kBaseN");
   if (rhs == 0) {
-    return 0;
+    return {};
   }
   if (rhs < 0) {
     lhs.sign_ ^= 1;
@@ -410,18 +410,18 @@ sjtu::int2048 sjtu::multiplyInt(sjtu::int2048 lhs, int rhs) {
   return lhs;
 }
 
-sjtu::NTTBase::Int sjtu::operator+(sjtu::NTTBase::Int a, sjtu::NTTBase::Int b) {
+high_precision::NTTBase::Int high_precision::operator+(high_precision::NTTBase::Int a, high_precision::NTTBase::Int b) {
   unsigned c = a.x + b.x;
-  return c >= sjtu::NTTBase::kMod ? c - sjtu::NTTBase::kMod : c;
+  return c >= high_precision::NTTBase::kMod ? c - high_precision::NTTBase::kMod : c;
 }
-sjtu::NTTBase::Int sjtu::operator-(sjtu::NTTBase::Int a, sjtu::NTTBase::Int b) {
-  return a + sjtu::NTTBase::Int(sjtu::NTTBase::kMod - b.x);
+high_precision::NTTBase::Int high_precision::operator-(high_precision::NTTBase::Int a, high_precision::NTTBase::Int b) {
+  return a + high_precision::NTTBase::Int(high_precision::NTTBase::kMod - b.x);
 }
-sjtu::NTTBase::Int sjtu::operator*(sjtu::NTTBase::Int a, sjtu::NTTBase::Int b) {
-  return (unsigned long long) a.x * b.x % sjtu::NTTBase::kMod;
+high_precision::NTTBase::Int high_precision::operator*(high_precision::NTTBase::Int a, high_precision::NTTBase::Int b) {
+  return (unsigned long long) a.x * b.x % high_precision::NTTBase::kMod;
 }
-constexpr sjtu::NTTBase::Int sjtu::NTTBase::powerMod(sjtu::NTTBase::Int a, unsigned int b) {
-  sjtu::NTTBase::Int res = 1;
+constexpr high_precision::NTTBase::Int high_precision::NTTBase::powerMod(high_precision::NTTBase::Int a, unsigned int b) {
+  high_precision::NTTBase::Int res = 1;
   for (; b; b >>= 1) {
     if (b & 1) {
       res = res * a;
@@ -430,10 +430,10 @@ constexpr sjtu::NTTBase::Int sjtu::NTTBase::powerMod(sjtu::NTTBase::Int a, unsig
   }
   return res;
 }
-constexpr sjtu::NTTBase::Int sjtu::NTTBase::getInverse(sjtu::NTTBase::Int a) {
+constexpr high_precision::NTTBase::Int high_precision::NTTBase::getInverse(high_precision::NTTBase::Int a) {
   return powerMod(a, kMod - 2).x;
 }
-void sjtu::NTTBase::calculateRev(size_t n) {
+void high_precision::NTTBase::calculateRev(size_t n) {
   if (rev_.size() == n) {
     return;
   }
@@ -443,20 +443,20 @@ void sjtu::NTTBase::calculateRev(size_t n) {
     rev_[i] = (rev_[i >> 1] >> 1) | ((i & 1) * n2);
   }
 }
-void sjtu::NTTBase::change(std::vector<Int> &x) {
+void high_precision::NTTBase::change(std::vector<Int> &x) {
   for (size_t i = 0; i < x.size(); i++) {
     if (rev_[i] < i) {
       swap(x[i], x[rev_[i]]);
     }
   }
 }
-constexpr void sjtu::NTTBase::swap(sjtu::NTTBase::Int &a, sjtu::NTTBase::Int &b) {
+constexpr void high_precision::NTTBase::swap(high_precision::NTTBase::Int &a, high_precision::NTTBase::Int &b) {
   a.x ^= b.x ^= a.x ^= b.x;
 }
-size_t sjtu::NTTBase::getLength(size_t l1, size_t l2) {
+size_t high_precision::NTTBase::getLength(size_t l1, size_t l2) {
   return 1 << (sizeof(size_t) * 8 - __builtin_clzll(l1 + l2 - 1));
 }
-void sjtu::NTTBase::ntt(std::vector<Int> &x, bool positive) {
+void high_precision::NTTBase::ntt(std::vector<Int> &x, bool positive) {
   change(x);
   for (size_t h = 2; h <= x.size(); h <<= 1) {
     Int w0 = powerMod(positive ? kG : kInvG, (kMod - 1) / h);
@@ -477,7 +477,7 @@ void sjtu::NTTBase::ntt(std::vector<Int> &x, bool positive) {
     }
   }
 }
-std::vector<sjtu::NTTBase::Int> sjtu::NTTBase::unpack(const std::vector<num_t> &num) {
+std::vector<high_precision::NTTBase::Int> high_precision::NTTBase::unpack(const std::vector<num_t> &num) {
   std::vector<Int> res;
   res.reserve(num.size() * kBaseN);
   for (auto i : num) {
@@ -491,7 +491,7 @@ std::vector<sjtu::NTTBase::Int> sjtu::NTTBase::unpack(const std::vector<num_t> &
   }
   return res;
 }
-std::vector<sjtu::num_t> sjtu::NTTBase::pack(const std::vector<Int> &num) {
+std::vector<high_precision::num_t> high_precision::NTTBase::pack(const std::vector<Int> &num) {
   std::vector<num_t> res;
   res.reserve((num.size() + kBaseN - 1) / kBaseN);
   unsigned digit = 0;
@@ -509,7 +509,7 @@ std::vector<sjtu::num_t> sjtu::NTTBase::pack(const std::vector<Int> &num) {
   }
   return res;
 }
-std::vector<sjtu::NTTBase::Int> sjtu::NTTBase::multiply(std::vector<Int> &a, std::vector<Int> &b) {
+std::vector<high_precision::NTTBase::Int> high_precision::NTTBase::multiply(std::vector<Int> &a, std::vector<Int> &b) {
   size_t n = getLength(a.size(), b.size());
   calculateRev(n);
   a.resize(n, 0);
@@ -527,8 +527,8 @@ std::vector<sjtu::NTTBase::Int> sjtu::NTTBase::multiply(std::vector<Int> &a, std
   }
   return a;
 }
-std::vector<sjtu::num_t> sjtu::NTTBase::multiply(const std::vector<num_t> &a,
-                                                 const std::vector<num_t> &b) {
+std::vector<high_precision::num_t> high_precision::NTTBase::multiply(const std::vector<num_t> &a,
+                                                                     const std::vector<num_t> &b) {
   auto a_unpacked = unpack(a);
   auto b_unpacked = unpack(b);
   return pack(multiply(a_unpacked, b_unpacked));
