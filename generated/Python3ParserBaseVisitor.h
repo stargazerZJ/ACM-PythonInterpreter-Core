@@ -19,55 +19,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitFuncdef(Python3Parser::FuncdefContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitParameters(Python3Parser::ParametersContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitTypedargslist(Python3Parser::TypedargslistContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitTfpdef(Python3Parser::TfpdefContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitStmt(Python3Parser::StmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitSimple_stmt(Python3Parser::Simple_stmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitSmall_stmt(Python3Parser::Small_stmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitAugassign(Python3Parser::AugassignContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitFlow_stmt(Python3Parser::Flow_stmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitBreak_stmt(Python3Parser::Break_stmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitContinue_stmt(Python3Parser::Continue_stmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -87,7 +39,67 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitTest(Python3Parser::TestContext *ctx) override {
+  virtual std::any visitFuncdef(Python3Parser::FuncdefContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitParameters(Python3Parser::ParametersContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitTypedargslist(Python3Parser::TypedargslistContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitTfpdef(Python3Parser::TfpdefContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitSimple_stmt(Python3Parser::Simple_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitSmall_stmt(Python3Parser::Small_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFlow_stmt(Python3Parser::Flow_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitBreak_stmt(Python3Parser::Break_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitContinue_stmt(Python3Parser::Continue_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitRvalue_tuple(Python3Parser::Rvalue_tupleContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitAssign_stmt(Python3Parser::Assign_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitAugassign_stmt(Python3Parser::Augassign_stmtContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitAugassign(Python3Parser::AugassignContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitExpr(Python3Parser::ExprContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -131,19 +143,7 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitAtom_expr(Python3Parser::Atom_exprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitTrailer(Python3Parser::TrailerContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual std::any visitAtom(Python3Parser::AtomContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitTestlist(Python3Parser::TestlistContext *ctx) override {
     return visitChildren(ctx);
   }
 
@@ -152,6 +152,18 @@ public:
   }
 
   virtual std::any visitArgument(Python3Parser::ArgumentContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFunction_call(Python3Parser::Function_callContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitLvalue_tuple(Python3Parser::Lvalue_tupleContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitLvalue(Python3Parser::LvalueContext *ctx) override {
     return visitChildren(ctx);
   }
 
