@@ -3,11 +3,12 @@
 //
 
 #include "variable.h"
-void VariableBase::raiseTypeError() {
-  throw std::runtime_error("TypeError");
+void VariableBase::raiseTypeError(const VariableBase &rhs) const {
+  throw std::runtime_error("TypeError: unsupported operand type(s) for " + typeName() + " and "
+                               + rhs.typeName());
 }
 VariablePtr VariableBase::add(const VariableBase &rhs) const {
-  raiseTypeError();
+  raiseTypeError(rhs);
   return nullptr;
 }
 PyInt VariableBase::toInt() const {
@@ -27,35 +28,41 @@ PyBool VariableBase::toBool() const {
   return PyBool(false);
 }
 VariablePtr VariableBase::sub(const VariableBase &rhs) const {
-  raiseTypeError();
+  raiseTypeError(rhs);
   return nullptr;
 }
 VariablePtr VariableBase::mul(const VariableBase &rhs) const {
-  raiseTypeError();
+  raiseTypeError(rhs);
   return nullptr;
 }
 VariablePtr VariableBase::div(const VariableBase &rhs) const {
-  raiseTypeError();
+  raiseTypeError(rhs);
   return nullptr;
 }
 VariablePtr VariableBase::floor_div(const VariableBase &rhs) const {
-  raiseTypeError();
+  raiseTypeError(rhs);
   return nullptr;
 }
 VariablePtr VariableBase::mod(const VariableBase &rhs) const {
-  raiseTypeError();
+  raiseTypeError(rhs);
   return nullptr;
 }
-VariablePtr VariableBase::lessThan(const VariableBase &rhs) const {
-  raiseTypeError();
-  return nullptr;
+bool VariableBase::lessThan(const VariableBase &rhs) const {
+  raiseTypeError(rhs);
+  return false;
 }
 VariablePtr VariableBase::equal(const VariableBase &rhs) const {
-  raiseTypeError();
+  raiseTypeError(rhs);
   return nullptr;
 }
 bool VariableBase::isNumeric() const {
   return false;
+}
+std::string VariableBase::typeName() const {
+  return "'VariableBase'";
+}
+void VariableBase::raiseTypeError() const {
+  throw std::runtime_error("TypeError: unsupported argument type " + typeName());
 }
 
 VariablePtr PyInt::add(const VariableBase &rhs) const {
@@ -67,7 +74,7 @@ VariablePtr PyInt::add(const VariableBase &rhs) const {
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
     return std::make_shared<PyInt>(value + rhs_bool->toInt().value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
@@ -83,7 +90,7 @@ VariablePtr PyInt::sub(const VariableBase &rhs) const {
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
     return std::make_shared<PyInt>(value - rhs_bool->toInt().value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
@@ -105,7 +112,7 @@ VariablePtr PyInt::mul(const VariableBase &rhs) const {
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
     return std::make_shared<PyInt>(value * rhs_bool->toInt().value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
@@ -116,7 +123,7 @@ VariablePtr PyInt::div(const VariableBase &rhs) const {
   if (rhs.isNumeric()) {
     return std::make_shared<PyFloat>(toFloat().value / rhs.toFloat().value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
@@ -129,24 +136,24 @@ VariablePtr PyInt::floor_div(const VariableBase &rhs) const {
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
     return std::make_shared<PyInt>(value / rhs_bool->toInt().value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
 VariablePtr PyInt::mod(const VariableBase &rhs) const {
   return sub(*(floor_div(rhs)->mul(rhs)));
 }
-VariablePtr PyInt::lessThan(const VariableBase &rhs) const {
+bool PyInt::lessThan(const VariableBase &rhs) const {
   auto rhs_ptr = &rhs;
   if (auto rhs_int = dynamic_cast<const PyInt *>(rhs_ptr)) {
-    return std::make_shared<PyBool>(value < rhs_int->value);
+    return value < rhs_int->value;
   } else if (dynamic_cast<const PyFloat *>(rhs_ptr)) {
     return toFloat().lessThan(rhs);
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
-    return std::make_shared<PyBool>(value < rhs_bool->toInt().value);
+    return value < rhs_bool->toInt().value;
   } else {
-    raiseTypeError();
-    return nullptr;
+    raiseTypeError(rhs);
+    return false;
   }
 }
 VariablePtr PyInt::equal(const VariableBase &rhs) const {
@@ -158,9 +165,12 @@ VariablePtr PyInt::equal(const VariableBase &rhs) const {
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
     return std::make_shared<PyBool>(value == rhs_bool->toInt().value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
+}
+std::string PyInt::typeName() const {
+  return "'int'";
 }
 VariablePtr PyFloat::add(const VariableBase &rhs) const {
   auto rhs_ptr = &rhs;
@@ -171,7 +181,7 @@ VariablePtr PyFloat::add(const VariableBase &rhs) const {
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
     return std::make_shared<PyFloat>(value + rhs_bool->value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
@@ -187,7 +197,7 @@ VariablePtr PyFloat::sub(const VariableBase &rhs) const {
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
     return std::make_shared<PyFloat>(value - rhs_bool->value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
@@ -207,7 +217,7 @@ VariablePtr PyFloat::mul(const VariableBase &rhs) const {
   if (rhs.isNumeric()) {
     return std::make_shared<PyFloat>(value * rhs.toFloat().value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
@@ -215,7 +225,7 @@ VariablePtr PyFloat::div(const VariableBase &rhs) const {
   if (rhs.isNumeric()) {
     return std::make_shared<PyFloat>(value / rhs.toFloat().value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
@@ -223,35 +233,38 @@ VariablePtr PyFloat::floor_div(const VariableBase &rhs) const {
   if (rhs.isNumeric()) {
     return std::make_shared<PyFloat>(std::floor(value / rhs.toFloat().value));
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
 VariablePtr PyFloat::mod(const VariableBase &rhs) const {
   return sub(*(floor_div(rhs)->mul(rhs)));
 }
-VariablePtr PyFloat::lessThan(const VariableBase &rhs) const {
+bool PyFloat::lessThan(const VariableBase &rhs) const {
   if (rhs.isNumeric()) {
-    return std::make_shared<PyBool>(value < rhs.toFloat().value);
+    return value < rhs.toFloat().value;
   } else {
-    raiseTypeError();
-    return nullptr;
+    raiseTypeError(rhs);
+    return false;
   }
 }
 VariablePtr PyFloat::equal(const VariableBase &rhs) const {
   if (rhs.isNumeric()) {
     return std::make_shared<PyBool>(value == rhs.toFloat().value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
+}
+std::string PyFloat::typeName() const {
+  return "'float'";
 }
 VariablePtr PyString::add(const VariableBase &rhs) const {
   auto rhs_ptr = &rhs;
   if (auto rhs_string = dynamic_cast<const PyString *>(rhs_ptr)) {
     return std::make_shared<PyString>(value + rhs_string->value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
@@ -277,17 +290,17 @@ VariablePtr PyString::mul(const VariableBase &rhs) const {
     }
     return std::make_shared<PyString>(result);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
 }
-VariablePtr PyString::lessThan(const VariableBase &rhs) const {
+bool PyString::lessThan(const VariableBase &rhs) const {
   auto rhs_ptr = &rhs;
   if (auto rhs_string = dynamic_cast<const PyString *>(rhs_ptr)) {
-    return std::make_shared<PyBool>(value < rhs_string->value);
+    return value < rhs_string->value;
   } else {
-    raiseTypeError();
-    return nullptr;
+    raiseTypeError(rhs);
+    return false;
   }
 }
 VariablePtr PyString::equal(const VariableBase &rhs) const {
@@ -295,9 +308,12 @@ VariablePtr PyString::equal(const VariableBase &rhs) const {
   if (auto rhs_string = dynamic_cast<const PyString *>(rhs_ptr)) {
     return std::make_shared<PyBool>(value == rhs_string->value);
   } else {
-    raiseTypeError();
+    raiseTypeError(rhs);
     return nullptr;
   }
+}
+std::string PyString::typeName() const {
+  return "'str'";
 }
 VariablePtr PyBool::add(const VariableBase &rhs) const {
   return toInt().add(rhs);
@@ -332,11 +348,14 @@ VariablePtr PyBool::floor_div(const VariableBase &rhs) const {
 VariablePtr PyBool::mod(const VariableBase &rhs) const {
   return toInt().mod(rhs);
 }
-VariablePtr PyBool::lessThan(const VariableBase &rhs) const {
+bool PyBool::lessThan(const VariableBase &rhs) const {
   return toInt().lessThan(rhs);
 }
 VariablePtr PyBool::equal(const VariableBase &rhs) const {
   return toInt().equal(rhs);
+}
+std::string PyBool::typeName() const {
+  return "'bool'";
 }
 
 PyString PyNone::toString() const {
@@ -347,4 +366,7 @@ PyBool PyNone::toBool() const {
 }
 VariablePtr PyNone::equal(const VariableBase &rhs) const {
   return std::make_shared<PyBool>(dynamic_cast<const PyNone *>(&rhs) != nullptr);
+}
+std::string PyNone::typeName() const {
+  return "'NoneType'";
 }

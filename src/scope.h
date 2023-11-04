@@ -20,6 +20,9 @@ class NameSpace {
   NameSpace() {
     scopes.emplace_back();
   }
+  bool InGlobalScope() {
+    return scopes.size() == 1;
+  }
   void addScope() {
     scopes.emplace_back();
   }
