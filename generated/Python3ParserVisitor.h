@@ -95,6 +95,18 @@ public:
 
     virtual std::any visitLvalue(Python3Parser::LvalueContext *context) = 0;
 
+    virtual std::any visitBuiltin_function(Python3Parser::Builtin_functionContext *context) = 0;
+
+    virtual std::any visitPrint_function(Python3Parser::Print_functionContext *context) = 0;
+
+    virtual std::any visitInt_function(Python3Parser::Int_functionContext *context) = 0;
+
+    virtual std::any visitBool_function(Python3Parser::Bool_functionContext *context) = 0;
+
+    virtual std::any visitStr_function(Python3Parser::Str_functionContext *context) = 0;
+
+    virtual std::any visitFloat_function(Python3Parser::Float_functionContext *context) = 0;
+
 
 };
 

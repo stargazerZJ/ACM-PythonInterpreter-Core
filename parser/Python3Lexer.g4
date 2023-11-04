@@ -142,6 +142,11 @@ TRUE: 'True';
 FALSE: 'False';
 CONTINUE: 'continue';
 BREAK: 'break';
+PRINT: 'print';
+INT_TYPE: 'int';
+FLOAT_TYPE: 'float';
+STRING_TYPE: 'str';
+BOOL_TYPE: 'bool';
 
 NEWLINE: (
 		{atStartOfInput()}? SPACES

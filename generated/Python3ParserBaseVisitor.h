@@ -167,6 +167,30 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual std::any visitBuiltin_function(Python3Parser::Builtin_functionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitPrint_function(Python3Parser::Print_functionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitInt_function(Python3Parser::Int_functionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitBool_function(Python3Parser::Bool_functionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitStr_function(Python3Parser::Str_functionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual std::any visitFloat_function(Python3Parser::Float_functionContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
 
 };
 

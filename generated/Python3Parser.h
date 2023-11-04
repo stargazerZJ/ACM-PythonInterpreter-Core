@@ -15,19 +15,20 @@ public:
     INDENT = 1, DEDENT = 2, STRING = 3, NUMBER = 4, INTEGER = 5, DEF = 6, 
     RETURN = 7, IF = 8, ELIF = 9, ELSE = 10, WHILE = 11, FOR = 12, IN = 13, 
     OR = 14, AND = 15, NOT = 16, NONE = 17, TRUE = 18, FALSE = 19, CONTINUE = 20, 
-    BREAK = 21, NEWLINE = 22, NAME = 23, STRING_LITERAL = 24, BYTES_LITERAL = 25, 
-    DECIMAL_INTEGER = 26, OCT_INTEGER = 27, HEX_INTEGER = 28, BIN_INTEGER = 29, 
-    FLOAT_NUMBER = 30, IMAG_NUMBER = 31, DOT = 32, ELLIPSIS = 33, STAR = 34, 
-    OPEN_PAREN = 35, CLOSE_PAREN = 36, COMMA = 37, COLON = 38, SEMI_COLON = 39, 
-    POWER = 40, ASSIGN = 41, OPEN_BRACK = 42, CLOSE_BRACK = 43, OR_OP = 44, 
-    XOR = 45, AND_OP = 46, LEFT_SHIFT = 47, RIGHT_SHIFT = 48, ADD = 49, 
-    MINUS = 50, DIV = 51, MOD = 52, IDIV = 53, NOT_OP = 54, OPEN_BRACE = 55, 
-    CLOSE_BRACE = 56, LESS_THAN = 57, GREATER_THAN = 58, EQUALS = 59, GT_EQ = 60, 
-    LT_EQ = 61, NOT_EQ_1 = 62, NOT_EQ_2 = 63, AT = 64, ARROW = 65, ADD_ASSIGN = 66, 
-    SUB_ASSIGN = 67, MULT_ASSIGN = 68, AT_ASSIGN = 69, DIV_ASSIGN = 70, 
-    MOD_ASSIGN = 71, AND_ASSIGN = 72, OR_ASSIGN = 73, XOR_ASSIGN = 74, LEFT_SHIFT_ASSIGN = 75, 
-    RIGHT_SHIFT_ASSIGN = 76, POWER_ASSIGN = 77, IDIV_ASSIGN = 78, SKIP_ = 79, 
-    UNKNOWN_CHAR = 80
+    BREAK = 21, PRINT = 22, INT_TYPE = 23, FLOAT_TYPE = 24, STRING_TYPE = 25, 
+    BOOL_TYPE = 26, NEWLINE = 27, NAME = 28, STRING_LITERAL = 29, BYTES_LITERAL = 30, 
+    DECIMAL_INTEGER = 31, OCT_INTEGER = 32, HEX_INTEGER = 33, BIN_INTEGER = 34, 
+    FLOAT_NUMBER = 35, IMAG_NUMBER = 36, DOT = 37, ELLIPSIS = 38, STAR = 39, 
+    OPEN_PAREN = 40, CLOSE_PAREN = 41, COMMA = 42, COLON = 43, SEMI_COLON = 44, 
+    POWER = 45, ASSIGN = 46, OPEN_BRACK = 47, CLOSE_BRACK = 48, OR_OP = 49, 
+    XOR = 50, AND_OP = 51, LEFT_SHIFT = 52, RIGHT_SHIFT = 53, ADD = 54, 
+    MINUS = 55, DIV = 56, MOD = 57, IDIV = 58, NOT_OP = 59, OPEN_BRACE = 60, 
+    CLOSE_BRACE = 61, LESS_THAN = 62, GREATER_THAN = 63, EQUALS = 64, GT_EQ = 65, 
+    LT_EQ = 66, NOT_EQ_1 = 67, NOT_EQ_2 = 68, AT = 69, ARROW = 70, ADD_ASSIGN = 71, 
+    SUB_ASSIGN = 72, MULT_ASSIGN = 73, AT_ASSIGN = 74, DIV_ASSIGN = 75, 
+    MOD_ASSIGN = 76, AND_ASSIGN = 77, OR_ASSIGN = 78, XOR_ASSIGN = 79, LEFT_SHIFT_ASSIGN = 80, 
+    RIGHT_SHIFT_ASSIGN = 81, POWER_ASSIGN = 82, IDIV_ASSIGN = 83, SKIP_ = 84, 
+    UNKNOWN_CHAR = 85
   };
 
   enum {
@@ -40,7 +41,9 @@ public:
     RuleNot_test = 24, RuleComparison = 25, RuleComp_op = 26, RuleArith_expr = 27, 
     RuleAddorsub_op = 28, RuleTerm = 29, RuleMuldivmod_op = 30, RuleFactor = 31, 
     RuleAtom = 32, RuleArglist = 33, RuleArgument = 34, RuleFunction_call = 35, 
-    RuleLvalue_tuple = 36, RuleLvalue = 37
+    RuleLvalue_tuple = 36, RuleLvalue = 37, RuleBuiltin_function = 38, RulePrint_function = 39, 
+    RuleInt_function = 40, RuleBool_function = 41, RuleStr_function = 42, 
+    RuleFloat_function = 43
   };
 
   explicit Python3Parser(antlr4::TokenStream *input);
@@ -97,7 +100,13 @@ public:
   class ArgumentContext;
   class Function_callContext;
   class Lvalue_tupleContext;
-  class LvalueContext; 
+  class LvalueContext;
+  class Builtin_functionContext;
+  class Print_functionContext;
+  class Int_functionContext;
+  class Bool_functionContext;
+  class Str_functionContext;
+  class Float_functionContext; 
 
   class  File_inputContext : public antlr4::ParserRuleContext {
   public:
@@ -659,9 +668,10 @@ public:
   public:
     Function_callContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    LvalueContext *lvalue();
     antlr4::tree::TerminalNode *OPEN_PAREN();
     antlr4::tree::TerminalNode *CLOSE_PAREN();
+    Builtin_functionContext *builtin_function();
+    LvalueContext *lvalue();
     ArglistContext *arglist();
 
 
@@ -699,6 +709,88 @@ public:
   };
 
   LvalueContext* lvalue();
+
+  class  Builtin_functionContext : public antlr4::ParserRuleContext {
+  public:
+    Builtin_functionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    Print_functionContext *print_function();
+    Int_functionContext *int_function();
+    Bool_functionContext *bool_function();
+    Str_functionContext *str_function();
+    Float_functionContext *float_function();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Builtin_functionContext* builtin_function();
+
+  class  Print_functionContext : public antlr4::ParserRuleContext {
+  public:
+    Print_functionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *PRINT();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Print_functionContext* print_function();
+
+  class  Int_functionContext : public antlr4::ParserRuleContext {
+  public:
+    Int_functionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *INT_TYPE();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Int_functionContext* int_function();
+
+  class  Bool_functionContext : public antlr4::ParserRuleContext {
+  public:
+    Bool_functionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *BOOL_TYPE();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Bool_functionContext* bool_function();
+
+  class  Str_functionContext : public antlr4::ParserRuleContext {
+  public:
+    Str_functionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *STRING_TYPE();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Str_functionContext* str_function();
+
+  class  Float_functionContext : public antlr4::ParserRuleContext {
+  public:
+    Float_functionContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *FLOAT_TYPE();
+
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Float_functionContext* float_function();
 
 
   // By default the static state used to implement the parser is lazily initialized during the first

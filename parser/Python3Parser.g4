@@ -46,11 +46,19 @@ muldivmod_op: '*'|'/'|'//'|'%';
 factor: ('+'|'-') factor | atom;
 
 atom: (NAME | NUMBER | STRING+| 'None' | 'True' | 'False' | ('(' expr ')') | function_call);
+//atom: (NAME | INTEGER | FLOAT_NUMBER | STRING+| 'None' | 'True' | 'False' | ('(' expr ')') | function_call);
+//atom_test: (NAME | INTEGER | STRING+| 'None' | 'True' | 'False' | ('(' expr ')') | function_call);
 arglist: argument (',' argument)*  (',')?;
 argument: ( expr |
             NAME '=' expr );
 
-function_call: lvalue '(' (arglist)? ')';
+function_call: (builtin_function | lvalue) '(' (arglist)? ')';
 
 lvalue_tuple: lvalue (',' lvalue)* (',')?;
 lvalue: NAME;
+builtin_function: (print_function | int_function | bool_function | str_function | float_function);
+print_function: 'print';
+int_function: 'int';
+bool_function: 'bool';
+str_function: 'str';
+float_function: 'float';

@@ -13,6 +13,7 @@
 #include <vector>
 #include <array>
 #include <algorithm>
+#include <cmath>
 
 namespace high_precision {
 using num_t = unsigned long long;
@@ -70,6 +71,9 @@ class int2048 : public NTTBase {
 
   void read(const std::string &);
   [[nodiscard]] std::string toString() const;
+  [[nodiscard]] double toDouble() const;
+  [[nodiscard]] bool toBool() const;
+  [[nodiscard]] long long int toLongLong() const;
   void print() const;
 
   int2048 operator+() const;

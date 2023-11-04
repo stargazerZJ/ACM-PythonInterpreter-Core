@@ -2,6 +2,8 @@
 // Created by zj on 10/24/2023.
 //
 
+#include <ranges>
+
 #include "include/int2048.h"
 
 high_precision::int2048::int2048() : sign_(0), num_(1, 0) {}
@@ -25,6 +27,9 @@ high_precision::int2048::int2048(long long x) {
 }
 
 high_precision::int2048::int2048(const std::string &s) {
+  if (s.empty()) {
+    *this = int2048();
+  }
   if (s[0] == '-') {
     sign_ = 1;
   } else {
@@ -34,9 +39,11 @@ high_precision::int2048::int2048(const std::string &s) {
   int len = s.length();
   num_.resize((len - sign_ + kBaseN - 1) / kBaseN, 0);
   auto it = num_.begin();
-//  num_t base = 1;
   unsigned digit = 0;
   for (int i = len - 1; i >= sign_; i--) {
+    if (!isdigit(s[i])) {
+      throw std::runtime_error("ValueError");
+    }
     *it += (s[i] & 0xF) * kBaseArray[digit];
     if (++digit == kBaseN) {
       digit = 0;
@@ -180,26 +187,30 @@ high_precision::int2048 &high_precision::int2048::plusOrMinus(const int2048 &oth
 high_precision::int2048 &high_precision::int2048::operator+=(const high_precision::int2048 &other) {
   return plusOrMinus(other, false);
 }
-high_precision::int2048 high_precision::operator+(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
+high_precision::int2048 high_precision::operator+(high_precision::int2048 lhs,
+                                                  const high_precision::int2048 &rhs) {
   return lhs.plusOrMinus(rhs, false);
 }
 high_precision::int2048 &high_precision::int2048::add(const high_precision::int2048 &other) {
   return plusOrMinus(other, false);
 }
-high_precision::int2048 high_precision::add(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
+high_precision::int2048 high_precision::add(high_precision::int2048 lhs,
+                                            const high_precision::int2048 &rhs) {
   return lhs.plusOrMinus(rhs, false);
 }
 
 high_precision::int2048 &high_precision::int2048::operator-=(const high_precision::int2048 &rhs) {
   return plusOrMinus(rhs, true);
 }
-high_precision::int2048 high_precision::operator-(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
+high_precision::int2048 high_precision::operator-(high_precision::int2048 lhs,
+                                                  const high_precision::int2048 &rhs) {
   return lhs.plusOrMinus(rhs, true);
 }
 high_precision::int2048 &high_precision::int2048::minus(const high_precision::int2048 &other) {
   return plusOrMinus(other, true);
 }
-high_precision::int2048 high_precision::minus(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
+high_precision::int2048 high_precision::minus(high_precision::int2048 lhs,
+                                              const high_precision::int2048 &rhs) {
   return lhs.plusOrMinus(rhs, true);
 }
 
@@ -228,13 +239,16 @@ std::ostream &high_precision::operator<<(std::ostream &os, const high_precision:
   os << x.toString();
   return os;
 }
-bool high_precision::operator==(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
+bool high_precision::operator==(const high_precision::int2048 &lhs,
+                                const high_precision::int2048 &rhs) {
   return lhs.sign_ == rhs.sign_ && lhs.num_ == rhs.num_;
 }
-bool high_precision::operator!=(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
+bool high_precision::operator!=(const high_precision::int2048 &lhs,
+                                const high_precision::int2048 &rhs) {
   return !(lhs == rhs);
 }
-bool high_precision::operator<(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
+bool high_precision::operator<(const high_precision::int2048 &lhs,
+                               const high_precision::int2048 &rhs) {
   if (lhs.sign_ != rhs.sign_) {
     return lhs.sign_ > rhs.sign_;
   }
@@ -251,16 +265,20 @@ bool high_precision::operator<(const high_precision::int2048 &lhs, const high_pr
   }
   return false;
 }
-bool high_precision::operator>(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
+bool high_precision::operator>(const high_precision::int2048 &lhs,
+                               const high_precision::int2048 &rhs) {
   return rhs < lhs;
 }
-bool high_precision::operator<=(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
+bool high_precision::operator<=(const high_precision::int2048 &lhs,
+                                const high_precision::int2048 &rhs) {
   return !(lhs > rhs);
 }
-bool high_precision::operator>=(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
+bool high_precision::operator>=(const high_precision::int2048 &lhs,
+                                const high_precision::int2048 &rhs) {
   return !(lhs < rhs);
 }
-high_precision::int2048 high_precision::operator*(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
+high_precision::int2048 high_precision::operator*(const high_precision::int2048 &lhs,
+                                                  const high_precision::int2048 &rhs) {
   if (lhs.isZero() || rhs.isZero()) {
     return {};
   }
@@ -354,9 +372,10 @@ int high_precision::int2048::length() const {
   leading_zeros = kBaseN - leading_zeros;
   return size() * kBaseN - leading_zeros;
 }
-high_precision::int2048 high_precision::divide(high_precision::int2048 dividend, high_precision::int2048 divisor) {
+high_precision::int2048 high_precision::divide(high_precision::int2048 dividend,
+                                               high_precision::int2048 divisor) {
   if (divisor.isZero()) {
-    throw std::runtime_error("Divide by zero");
+    throw std::runtime_error("ZeroDivisionError");
   }
   if (divisor.sign_) {
     dividend.sign_ ^= 1;
@@ -380,13 +399,15 @@ high_precision::int2048 &high_precision::int2048::flipSign() {
 high_precision::int2048 &high_precision::int2048::operator/=(const high_precision::int2048 &rhs) {
   return *this = divide(*this, rhs);
 }
-high_precision::int2048 high_precision::operator/(const high_precision::int2048 &lhs, const high_precision::int2048 &rhs) {
+high_precision::int2048 high_precision::operator/(const high_precision::int2048 &lhs,
+                                                  const high_precision::int2048 &rhs) {
   return divide(lhs, rhs);
 }
 high_precision::int2048 &high_precision::int2048::operator%=(const high_precision::int2048 &rhs) {
   return *this -= *this / rhs * rhs;
 }
-high_precision::int2048 high_precision::operator%(high_precision::int2048 lhs, const high_precision::int2048 &rhs) {
+high_precision::int2048 high_precision::operator%(high_precision::int2048 lhs,
+                                                  const high_precision::int2048 &rhs) {
   return lhs %= rhs;
 }
 high_precision::int2048 high_precision::multiplyInt(high_precision::int2048 lhs, int rhs) {
@@ -409,18 +430,51 @@ high_precision::int2048 high_precision::multiplyInt(high_precision::int2048 lhs,
   }
   return lhs;
 }
+double high_precision::int2048::toDouble() const {
+  double res = 0;
+  for (unsigned long long it : std::ranges::reverse_view(num_)) {
+    res = res * kBase + it;
+  }
+  if (std::isinf(res)) {
+    throw std::runtime_error("OverflowError");
+  }
+  return sign_ ? -res : res;
+}
+bool high_precision::int2048::toBool() const {
+  return !isZero();
+}
+long long int high_precision::int2048::toLongLong() const {
+  if (size() > 2) {
+    throw std::runtime_error("OverflowError");
+  }
+  long long int res = 0;
+  for (unsigned long long it : std::ranges::reverse_view(num_)) {
+    if (res > (std::numeric_limits<long long int>::max() - it) / kBase) {
+      throw std::runtime_error("OverflowError");
+    }
+    res = res * kBase + it;
+  }
+  if (sign_) {
+    res = -res;
+  }
+  return res;
+}
 
-high_precision::NTTBase::Int high_precision::operator+(high_precision::NTTBase::Int a, high_precision::NTTBase::Int b) {
+high_precision::NTTBase::Int high_precision::operator+(high_precision::NTTBase::Int a,
+                                                       high_precision::NTTBase::Int b) {
   unsigned c = a.x + b.x;
   return c >= high_precision::NTTBase::kMod ? c - high_precision::NTTBase::kMod : c;
 }
-high_precision::NTTBase::Int high_precision::operator-(high_precision::NTTBase::Int a, high_precision::NTTBase::Int b) {
+high_precision::NTTBase::Int high_precision::operator-(high_precision::NTTBase::Int a,
+                                                       high_precision::NTTBase::Int b) {
   return a + high_precision::NTTBase::Int(high_precision::NTTBase::kMod - b.x);
 }
-high_precision::NTTBase::Int high_precision::operator*(high_precision::NTTBase::Int a, high_precision::NTTBase::Int b) {
+high_precision::NTTBase::Int high_precision::operator*(high_precision::NTTBase::Int a,
+                                                       high_precision::NTTBase::Int b) {
   return (unsigned long long) a.x * b.x % high_precision::NTTBase::kMod;
 }
-constexpr high_precision::NTTBase::Int high_precision::NTTBase::powerMod(high_precision::NTTBase::Int a, unsigned int b) {
+constexpr high_precision::NTTBase::Int high_precision::NTTBase::powerMod(high_precision::NTTBase::Int a,
+                                                                         unsigned int b) {
   high_precision::NTTBase::Int res = 1;
   for (; b; b >>= 1) {
     if (b & 1) {
@@ -450,7 +504,8 @@ void high_precision::NTTBase::change(std::vector<Int> &x) {
     }
   }
 }
-constexpr void high_precision::NTTBase::swap(high_precision::NTTBase::Int &a, high_precision::NTTBase::Int &b) {
+constexpr void high_precision::NTTBase::swap(high_precision::NTTBase::Int &a,
+                                             high_precision::NTTBase::Int &b) {
   a.x ^= b.x ^= a.x ^= b.x;
 }
 size_t high_precision::NTTBase::getLength(size_t l1, size_t l2) {
@@ -509,7 +564,8 @@ std::vector<high_precision::num_t> high_precision::NTTBase::pack(const std::vect
   }
   return res;
 }
-std::vector<high_precision::NTTBase::Int> high_precision::NTTBase::multiply(std::vector<Int> &a, std::vector<Int> &b) {
+std::vector<high_precision::NTTBase::Int> high_precision::NTTBase::multiply(std::vector<Int> &a,
+                                                                            std::vector<Int> &b) {
   size_t n = getLength(a.size(), b.size());
   calculateRev(n);
   a.resize(n, 0);

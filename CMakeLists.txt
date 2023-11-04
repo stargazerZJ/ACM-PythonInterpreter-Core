@@ -22,7 +22,7 @@ include_directories(
 add_subdirectory( ${PROJECT_SOURCE_DIR}/include/int2048 )
 add_subdirectory( ${PROJECT_SOURCE_DIR}/generated )
 
-file(GLOB_RECURSE main_src src/*.cpp)
+file(GLOB_RECURSE main_src src/*.cpp src/*.h)
 
 add_executable(code ${main_src}) # Add all *.cpp file after src/main.cpp, like src/Evalvisitor.cpp did
 
