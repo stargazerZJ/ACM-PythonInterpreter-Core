@@ -12,7 +12,7 @@
 
 class EvalVisitor : public Python3ParserBaseVisitor {
 private:
-  NameSpace name_space;
+  NameSpace name_space_;
  public:
   std::any visitAtom(Python3Parser::AtomContext *ctx) override;
   std::any visitFunction_call(Python3Parser::Function_callContext *ctx) override;
@@ -34,6 +34,11 @@ private:
   std::any visitAugassign_stmt(Python3Parser::Augassign_stmtContext *ctx) override;
   std::any visitRvalue_tuple(Python3Parser::Rvalue_tupleContext *ctx) override;
   std::any visitAssign_stmt(Python3Parser::Assign_stmtContext *ctx) override;
+  std::any visitSimple_stmt(Python3Parser::Simple_stmtContext *ctx) override;
+  std::any visitFuncdef_args(Python3Parser::Funcdef_argsContext *ctx) override;
+  std::any visitFuncdef(Python3Parser::FuncdefContext *ctx) override;
+  std::any visitArglist(Python3Parser::ArglistContext *ctx) override;
+  std::any visitSmall_stmt(Python3Parser::Small_stmtContext *ctx) override;
 };
 
 

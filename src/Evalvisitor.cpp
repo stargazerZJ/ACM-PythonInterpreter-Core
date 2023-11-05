@@ -3,24 +3,15 @@ std::any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx) {
 //  std::cerr << "visitAtom" << std::endl;
 //  std::cerr << "Code :" << ctx->getText() << std::endl;
   if (ctx->NAME()) {
-    return name_space.get(ctx->NAME()->toString());
+    const VariablePtr &ptr = name_space_.get(ctx->NAME()->toString());
+
+    return ptr;
   } else if (ctx->NUMBER()) {
     auto str = ctx->NUMBER()->toString();
     // if the string contains '.', it is a float
     if (str.find('.') != std::string::npos) {
       return static_cast<VariablePtr>(std::make_shared<PyFloat>(std::stod(str)));
     } else {
-//      std::cerr << "The type of atom is int" << std::endl;
-//      auto test = PyInt(str);
-//      std::cerr << "Value : " << test.toString().value << std::endl;
-// auto test_shared = std::make_shared<VariableBase>(test);
-//      auto test_shared = static_cast<VariablePtr>(std::make_shared<PyInt>(test));
-//      std::cerr << "Cast to shared_ptr" << std::endl;
-//      std::cerr << "Value : " << test_shared->toString().value << std::endl;
-//      auto test_any = std::any(test_shared);
-//      auto test_reconstruct = std::any_cast<VariablePtr>(test_any);
-//      std::cerr << "Cast to any" << std::endl;
-//      std::cerr << "Value : " << test_reconstruct->toString().value << std::endl;
       return static_cast<VariablePtr>(std::make_shared<PyInt>(str));
     }
   } else if (auto strings = ctx->STRING(); !strings.empty()) {
@@ -28,7 +19,6 @@ std::any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx) {
     for (auto string : strings) {
       auto str = string->toString();
       str = str.substr(1, str.size() - 2);
-      // convert control characters into their corresponding characters
       res += expandControlCharacters(str);
     }
     return static_cast<VariablePtr>(std::make_shared<PyString>(res));
@@ -47,8 +37,36 @@ std::any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx) {
 }
 std::any EvalVisitor::visitFunction_call(Python3Parser::Function_callContext *ctx) {
   if (ctx->lvalue()) {
-    // unimplemented
-    throw std::runtime_error("unimplemented");
+    auto name = std::any_cast<std::string>(visit(ctx->lvalue()));
+    auto variable = name_space_.get(name);
+    auto func = std::dynamic_pointer_cast<PyFunc>(variable);
+    if (func == nullptr) {
+      throw std::runtime_error("TypeError: " + variable->typeName() + " object is not callable");
+    }
+    auto call_args = std::any_cast<FunctionCallArgs>(visit(ctx->arglist()));
+    auto args = func->matchParams(call_args);
+    name_space_.addScope();
+//    for(auto name : func->args.names) {
+//      std::cerr << "name" <<
+//    }
+    for (size_t i = 0; i < args.size(); ++i) {
+//      std::cerr << "Argument Assign: " << func->args.names[i] << " = " << args[i]->toString().value
+//                << std::endl;
+      name_space_.assign(func->args.names[i], args[i]);
+    }
+    auto res = visit(func->body);
+    name_space_.popScope();
+    if (auto py_flow = std::any_cast<PyFlow>(&res)) {
+      if (py_flow->type == PyFlow::Type::RETURN) {
+        return py_flow->value;
+      } else if (py_flow->type == PyFlow::Type::BREAK) {
+        throw std::runtime_error("SyntaxError: 'break' outside loop");
+      } else if (py_flow->type == PyFlow::Type::CONTINUE) {
+        throw std::runtime_error("SyntaxError: 'continue' not properly in loop");
+      }
+      return nullptr;
+    }
+    return static_cast<VariablePtr>(std::make_shared<PyNone>());
   }
   auto builtin = ctx->builtin_function();
   if (builtin->print_function()) {
@@ -94,20 +112,20 @@ std::any EvalVisitor::visitLvalue_tuple(Python3Parser::Lvalue_tupleContext *ctx)
   auto res = lvalueTuple();
   res.reserve(lvalues.size());
   for (auto lvalue : lvalues) {
-    res.emplace_back(std::any_cast<std::string>(lvalue));
+    res.emplace_back(std::any_cast<std::string>(visitLvalue(lvalue)));
   }
   return res;
 }
 std::any EvalVisitor::visitFactor(Python3Parser::FactorContext *ctx) {
   if (ctx->MINUS()) {
-    auto res = std::any_cast<VariablePtr>(visit(ctx->atom()));
+    auto res = std::any_cast<VariablePtr>(visit(ctx->factor()));
     if (res->isNumeric()) {
       return res->mul(PyInt(-1));
     }
     throw std::runtime_error("TypeError: bad operand type for unary -: " + res->typeName());
   }
   if (ctx->ADD()) {
-    auto res = std::any_cast<VariablePtr>(visit(ctx->atom()));
+    auto res = std::any_cast<VariablePtr>(visit(ctx->factor()));
     if (res->isNumeric()) {
       return res;
     }
@@ -209,8 +227,6 @@ std::any EvalVisitor::visitComparison(Python3Parser::ComparisonContext *ctx) {
     }
     ++i;
   }
-//  std::cerr << "lhs->toString().value : " << lhs->toString().value << std::endl;
-//  std::cerr << "Return true" << std::endl;
   return static_cast<VariablePtr>(std::make_shared<PyBool>(true));
 }
 std::any EvalVisitor::visitNot_test(Python3Parser::Not_testContext *ctx) {
@@ -258,12 +274,11 @@ std::any EvalVisitor::visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) {
   if (ctx->rvalue_tuple()) {
     return PyFlow(PyFlow::Type::RETURN, visit(ctx->rvalue_tuple()));
   }
-  return PyFlow(PyFlow::Type::RETURN);
+  return PyFlow(PyFlow::Type::RETURN, static_cast<VariablePtr>(std::make_shared<PyNone>()));
 }
 std::any EvalVisitor::visitSuite(Python3Parser::SuiteContext *ctx) {
   if (ctx->simple_stmt()) {
-    visit(ctx->simple_stmt());
-    return nullptr;
+    return visit(ctx->simple_stmt());
   }
   auto statements = ctx->stmt();
   for (auto stmt : statements) {
@@ -315,23 +330,23 @@ std::any EvalVisitor::visitLvalue(Python3Parser::LvalueContext *ctx) {
 std::any EvalVisitor::visitAugassign_stmt(Python3Parser::Augassign_stmtContext *ctx) {
   auto lvalue = std::any_cast<std::string>(visit(ctx->lvalue()));
   auto rhs = std::any_cast<VariablePtr>(visit(ctx->expr()));
-  auto lhs = name_space.get(lvalue);
+  auto lhs = name_space_.get(lvalue);
   if (ctx->augassign()->ADD_ASSIGN()) {
-    name_space.assign(lvalue, lhs->add(*rhs));
+    name_space_.assign(lvalue, lhs->add(*rhs));
   } else if (ctx->augassign()->SUB_ASSIGN()) {
-    name_space.assign(lvalue, lhs->sub(*rhs));
+    name_space_.assign(lvalue, lhs->sub(*rhs));
   } else if (ctx->augassign()->MULT_ASSIGN()) {
-    name_space.assign(lvalue, lhs->mul(*rhs));
+    name_space_.assign(lvalue, lhs->mul(*rhs));
   } else if (ctx->augassign()->DIV_ASSIGN()) {
-    name_space.assign(lvalue, lhs->div(*rhs));
+    name_space_.assign(lvalue, lhs->div(*rhs));
   } else if (ctx->augassign()->IDIV_ASSIGN()) {
-    name_space.assign(lvalue, lhs->floor_div(*rhs));
+    name_space_.assign(lvalue, lhs->floor_div(*rhs));
   } else if (ctx->augassign()->MOD_ASSIGN()) {
-    name_space.assign(lvalue, lhs->mod(*rhs));
+    name_space_.assign(lvalue, lhs->mod(*rhs));
   } else {
     throw std::runtime_error("parse error in augassign_stmt");
   }
-  std::cerr << name_space.printVariables() << std::endl;
+//  std::cerr << name_space_.printVariables();
   return nullptr;
 }
 std::any EvalVisitor::visitRvalue_tuple(Python3Parser::Rvalue_tupleContext *ctx) {
@@ -352,14 +367,68 @@ std::any EvalVisitor::visitAssign_stmt(Python3Parser::Assign_stmtContext *ctx) {
   for (auto lvalue_context : std::ranges::reverse_view(lvalues)) {
     auto lvalue = visit(lvalue_context);
     if (auto lhs = std::any_cast<std::string>(&lvalue)) {
-      name_space.assign(*lhs, rhs);
-      rhs = name_space.get(*lhs);
+      name_space_.assign(*lhs, rhs);
+      rhs = name_space_.get(*lhs);
     } else {
       auto lhs_tuple = std::any_cast<lvalueTuple>(lvalue);
-      name_space.assign(lhs_tuple, rhs);
-      rhs = name_space.get(lhs_tuple);
+      name_space_.assign(lhs_tuple, rhs);
+      rhs = name_space_.get(lhs_tuple);
     }
   }
-  std::cerr << name_space.printVariables() << std::endl;
+//  std::cerr << name_space_.printVariables();
   return nullptr;
+}
+std::any EvalVisitor::visitSimple_stmt(Python3Parser::Simple_stmtContext *ctx) {
+  return visit(ctx->small_stmt());
+}
+std::any EvalVisitor::visitFuncdef_args(Python3Parser::Funcdef_argsContext *ctx) {
+  auto definitions = ctx->funcdef_arg();
+  PyFunc::Args args(definitions.size());
+  bool has_non_default = false;
+  size_t i = 0;
+  for (auto definition : definitions) {
+    args.names[i] = definition->NAME()->toString();
+    if (definition->expr()) {
+      has_non_default = true;
+      args.default_value[i] = std::any_cast<VariablePtr>(visit(definition->expr()));
+    } else {
+      if (has_non_default) {
+        throw std::runtime_error("SyntaxError: non-default argument follows default argument");
+      }
+      ++args.min_args;
+    }
+    ++i;
+  }
+  return args;
+}
+std::any EvalVisitor::visitFuncdef(Python3Parser::FuncdefContext *ctx) {
+  auto name = ctx->NAME()->toString();
+  auto args = std::any_cast<PyFunc::Args>(visit(ctx->funcdef_args()));
+  auto body = ctx->suite();
+  auto func = static_cast<VariablePtr>(std::make_shared<PyFunc>(name, args, body));
+  name_space_.assign(name, func);
+  return nullptr;
+}
+std::any EvalVisitor::visitArglist(Python3Parser::ArglistContext *ctx) {
+  auto arguments = ctx->argument();
+  auto res = FunctionCallArgs();
+  bool has_keyword = false;
+  for (auto argument : arguments) {
+    if (argument->NAME()) {
+      has_keyword = true;
+      res.kwargs[argument->NAME()->toString()] =
+          std::any_cast<VariablePtr>(visit(argument->expr()));
+    } else {
+      if (has_keyword) {
+        throw std::runtime_error("SyntaxError: positional argument follows keyword argument");
+      }
+      res.args.push_back(std::any_cast<VariablePtr>(visit(argument->expr())));
+    }
+  }
+  return res;
+}
+std::any EvalVisitor::visitSmall_stmt(Python3Parser::Small_stmtContext *ctx) {
+//  std::cerr << "executing: " << ctx->getText() << std::endl;
+//  std::cerr << name_space_.printVariables();
+  return Python3ParserBaseVisitor::visitSmall_stmt(ctx);
 }

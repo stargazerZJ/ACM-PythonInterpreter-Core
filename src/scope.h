@@ -15,35 +15,35 @@
 class NameSpace {
  private:
   using Scope = std::unordered_map<std::string, VariablePtr>;
-  std::vector<Scope> scopes;
+  std::vector<Scope> scopes_;
  public:
   NameSpace() {
-    scopes.emplace_back();
+    scopes_.emplace_back();
   }
   bool InGlobalScope() {
-    return scopes.size() == 1;
+    return scopes_.size() == 1;
   }
   void addScope() {
-    scopes.emplace_back();
+    scopes_.emplace_back();
   }
   void popScope() {
-    scopes.pop_back();
+    scopes_.pop_back();
   }
   void assign(const std::string &name, const VariablePtr &var) {
-    auto it_global = scopes.front().find(name);
-    if (it_global != scopes.front().end()) {
-      *it_global->second = *var;
+    auto it_global = scopes_.front().find(name);
+    if (it_global != scopes_.front().end()) {
+      it_global->second = var;
     } else {
-      scopes.back()[name] = var;
+      scopes_.back()[name] = var;
     }
   }
   VariablePtr get(const std::string &name) {
-    auto it_cur = scopes.back().find(name);
-    if (it_cur != scopes.back().end()) {
+    auto it_cur = scopes_.back().find(name);
+    if (it_cur != scopes_.back().end()) {
       return it_cur->second;
     }
-    auto it_global = scopes.front().find(name);
-    if (it_global != scopes.front().end()) {
+    auto it_global = scopes_.front().find(name);
+    if (it_global != scopes_.front().end()) {
       return it_global->second;
     }
     throw std::runtime_error("NameError: name '" + name + "' is not defined");
@@ -79,15 +79,17 @@ class NameSpace {
     // for debugging
     auto res = std::string();
     res += "== Global Scope ==\n";
-    for (auto &item : scopes.front()) {
+    for (auto &item : scopes_.front()) {
       res += item.first + " = " + item.second->toString().value + "\n";
     }
     if (!InGlobalScope()) {
       res += "== Local Scope ==\n";
-      for (auto &item : scopes.back()) {
+      for (auto &item : scopes_.back()) {
         res += item.first + " = " + item.second->toString().value + "\n";
       }
     }
+    res += "==================\n";
+    return res;
   }
 };
 

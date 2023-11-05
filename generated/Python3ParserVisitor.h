@@ -33,11 +33,9 @@ public:
 
     virtual std::any visitFuncdef(Python3Parser::FuncdefContext *context) = 0;
 
-    virtual std::any visitParameters(Python3Parser::ParametersContext *context) = 0;
+    virtual std::any visitFuncdef_args(Python3Parser::Funcdef_argsContext *context) = 0;
 
-    virtual std::any visitTypedargslist(Python3Parser::TypedargslistContext *context) = 0;
-
-    virtual std::any visitTfpdef(Python3Parser::TfpdefContext *context) = 0;
+    virtual std::any visitFuncdef_arg(Python3Parser::Funcdef_argContext *context) = 0;
 
     virtual std::any visitSimple_stmt(Python3Parser::Simple_stmtContext *context) = 0;
 

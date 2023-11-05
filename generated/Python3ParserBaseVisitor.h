@@ -43,15 +43,11 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual std::any visitParameters(Python3Parser::ParametersContext *ctx) override {
+  virtual std::any visitFuncdef_args(Python3Parser::Funcdef_argsContext *ctx) override {
     return visitChildren(ctx);
   }
 
-  virtual std::any visitTypedargslist(Python3Parser::TypedargslistContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual std::any visitTfpdef(Python3Parser::TfpdefContext *ctx) override {
+  virtual std::any visitFuncdef_arg(Python3Parser::Funcdef_argContext *ctx) override {
     return visitChildren(ctx);
   }
 

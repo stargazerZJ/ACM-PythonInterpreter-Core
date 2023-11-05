@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 #include "int2048.h"
 #include "Python3ParserBaseVisitor.h"
@@ -20,7 +21,7 @@ struct PyBool;
 struct PyNone;
 struct PyTuple;
 struct PyFunc;
-struct PyFuncArgs;
+struct FunctionCallArgs;
 struct PyFlow;
 
 using VariablePtr = std::shared_ptr<VariableBase>;
@@ -43,6 +44,7 @@ struct VariableBase {
   [[nodiscard]] virtual VariablePtr div(const VariableBase &rhs) const;
   [[nodiscard]] virtual VariablePtr floor_div(const VariableBase &rhs) const;
   [[nodiscard]] virtual VariablePtr mod(const VariableBase &rhs) const;
+  [[nodiscard]] virtual std::vector<VariablePtr> matchParams(FunctionCallArgs call_args) const;
   [[nodiscard]] virtual bool lessThan(const VariableBase &rhs) const;
   [[nodiscard]] virtual bool equal(const VariableBase &rhs) const;
 };
@@ -138,6 +140,31 @@ struct PyTuple : public VariableBase {
   [[nodiscard]] VariablePtr mul(const VariableBase &rhs) const override;
   [[nodiscard]] bool lessThan(const VariableBase &rhs) const override;
   [[nodiscard]] bool equal(const VariableBase &rhs) const override;
+};
+
+struct FunctionCallArgs {
+  FunctionCallArgs() = default;
+  std::vector<VariablePtr> args;
+  std::unordered_map<std::string, VariablePtr> kwargs;
+};
+
+struct PyFunc : public VariableBase {
+  struct Args;
+  explicit PyFunc(std::string name, Args args, Python3Parser::SuiteContext *body)
+      : name(std::move(name)), args(std::move(args)), body(body) {}
+  struct Args {
+    explicit Args(size_t n) : min_args(0), names(n), default_value(n) {}
+    size_t min_args;
+    lvalueTuple names;
+    std::vector<VariablePtr> default_value;
+  };
+  std::string name;
+  Args args;
+  Python3Parser::SuiteContext *body;
+  [[nodiscard]] std::string typeName() const override;
+  [[nodiscard]] PyString toString() const override;
+  [[nodiscard]] PyBool toBool() const override;
+  [[nodiscard]] std::vector<VariablePtr> matchParams(FunctionCallArgs call_args) const override;
 };
 
 struct PyFlow {

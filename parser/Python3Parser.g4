@@ -13,10 +13,13 @@ if_stmt: 'if' expr ':' suite ('elif' expr ':' suite)* ('else' ':' suite)?;
 while_stmt: 'while' expr ':' suite;
 suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT;
 
-funcdef: 'def' NAME parameters ':' suite;
-parameters: '(' typedargslist? ')';
-typedargslist: (tfpdef ('=' expr)? (',' tfpdef ('=' expr)?)*);
-tfpdef: NAME ;
+//funcdef: 'def' NAME parameters ':' suite;
+//parameters: '(' typedargslist? ')';
+//typedargslist: (tfpdef ('=' expr)? (',' tfpdef ('=' expr)?)*);
+//tfpdef: NAME ;
+funcdef: 'def' NAME '(' funcdef_args ')' ':' suite;
+funcdef_args: (funcdef_arg (',' funcdef_arg)* (',')?)?;
+funcdef_arg: (NAME | NAME '=' expr);
 
 simple_stmt: small_stmt  NEWLINE;
 small_stmt: expr_stmt | flow_stmt;
@@ -48,11 +51,11 @@ factor: ('+'|'-') factor | atom;
 atom: (NAME | NUMBER | STRING+| 'None' | 'True' | 'False' | ('(' expr ')') | function_call);
 //atom: (NAME | INTEGER | FLOAT_NUMBER | STRING+| 'None' | 'True' | 'False' | ('(' expr ')') | function_call);
 //atom_test: (NAME | INTEGER | STRING+| 'None' | 'True' | 'False' | ('(' expr ')') | function_call);
-arglist: argument (',' argument)*  (',')?;
+arglist: (argument (',' argument)*  (',')?)?;
 argument: ( expr |
             NAME '=' expr );
 
-function_call: (builtin_function | lvalue) '(' (arglist)? ')';
+function_call: (builtin_function | lvalue) '(' arglist ')';
 
 lvalue_tuple: lvalue (',' lvalue)* (',')?;
 lvalue: NAME;

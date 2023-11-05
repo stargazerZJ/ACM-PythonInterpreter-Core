@@ -64,6 +64,10 @@ std::string VariableBase::typeName() const {
 void VariableBase::raiseTypeError() const {
   throw std::runtime_error("TypeError: unsupported argument type " + typeName());
 }
+std::vector<VariablePtr> VariableBase::matchParams(FunctionCallArgs call_args) const {
+  raiseTypeError();
+  return {};
+}
 
 VariablePtr PyInt::add(const VariableBase &rhs) const {
   auto rhs_ptr = &rhs;
@@ -448,4 +452,43 @@ bool PyTuple::equal(const VariableBase &rhs) const {
     raiseTypeError(rhs);
     return false;
   }
+}
+std::string PyFunc::typeName() const {
+  return "'function'";
+}
+PyString PyFunc::toString() const {
+  return PyString("<function " + name + ">");
+}
+PyBool PyFunc::toBool() const {
+  return PyBool(true);
+}
+std::vector<VariablePtr> PyFunc::matchParams(FunctionCallArgs call_args) const {
+  if (!(args.min_args <= call_args.args.size() && call_args.args.size() <= args.names.size())) {
+    throw std::runtime_error("TypeError: " + name + "() takes from " + std::to_string(args.min_args)
+                                 + " to " + std::to_string(args.names.size())
+                                 + " positional arguments but "
+                                 + std::to_string(call_args.args.size()) + " were given");
+  }
+  std::vector<VariablePtr> param_values(args.names.size());
+  for (size_t i = 0; i < call_args.args.size(); ++i) {
+    param_values[i] = call_args.args[i];
+    if (call_args.kwargs.find(args.names[i]) != call_args.kwargs.end()) {
+      throw std::runtime_error("TypeError: " + name + "() got multiple values for argument '"
+                                   + args.names[i] + "'");
+    }
+  }
+  for (size_t i = call_args.args.size(); i < args.names.size(); ++i) {
+    auto it = call_args.kwargs.find(args.names[i]);
+    if (it != call_args.kwargs.end()) {
+      param_values[i] = it->second;
+      call_args.kwargs.erase(it);
+    } else {
+      param_values[i] = args.default_value[i];
+    }
+  }
+  if (!call_args.kwargs.empty()) {
+    throw std::runtime_error("TypeError: " + name + "() got an unexpected keyword argument '"
+                                 + call_args.kwargs.begin()->first + "'");
+  }
+  return param_values;
 }

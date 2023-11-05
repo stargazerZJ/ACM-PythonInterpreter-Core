@@ -33,17 +33,17 @@ public:
 
   enum {
     RuleFile_input = 0, RuleStmt = 1, RuleCompound_stmt = 2, RuleIf_stmt = 3, 
-    RuleWhile_stmt = 4, RuleSuite = 5, RuleFuncdef = 6, RuleParameters = 7, 
-    RuleTypedargslist = 8, RuleTfpdef = 9, RuleSimple_stmt = 10, RuleSmall_stmt = 11, 
-    RuleFlow_stmt = 12, RuleBreak_stmt = 13, RuleContinue_stmt = 14, RuleReturn_stmt = 15, 
-    RuleExpr_stmt = 16, RuleRvalue_tuple = 17, RuleAssign_stmt = 18, RuleAugassign_stmt = 19, 
-    RuleAugassign = 20, RuleExpr = 21, RuleOr_test = 22, RuleAnd_test = 23, 
-    RuleNot_test = 24, RuleComparison = 25, RuleComp_op = 26, RuleArith_expr = 27, 
-    RuleAddorsub_op = 28, RuleTerm = 29, RuleMuldivmod_op = 30, RuleFactor = 31, 
-    RuleAtom = 32, RuleArglist = 33, RuleArgument = 34, RuleFunction_call = 35, 
-    RuleLvalue_tuple = 36, RuleLvalue = 37, RuleBuiltin_function = 38, RulePrint_function = 39, 
-    RuleInt_function = 40, RuleBool_function = 41, RuleStr_function = 42, 
-    RuleFloat_function = 43
+    RuleWhile_stmt = 4, RuleSuite = 5, RuleFuncdef = 6, RuleFuncdef_args = 7, 
+    RuleFuncdef_arg = 8, RuleSimple_stmt = 9, RuleSmall_stmt = 10, RuleFlow_stmt = 11, 
+    RuleBreak_stmt = 12, RuleContinue_stmt = 13, RuleReturn_stmt = 14, RuleExpr_stmt = 15, 
+    RuleRvalue_tuple = 16, RuleAssign_stmt = 17, RuleAugassign_stmt = 18, 
+    RuleAugassign = 19, RuleExpr = 20, RuleOr_test = 21, RuleAnd_test = 22, 
+    RuleNot_test = 23, RuleComparison = 24, RuleComp_op = 25, RuleArith_expr = 26, 
+    RuleAddorsub_op = 27, RuleTerm = 28, RuleMuldivmod_op = 29, RuleFactor = 30, 
+    RuleAtom = 31, RuleArglist = 32, RuleArgument = 33, RuleFunction_call = 34, 
+    RuleLvalue_tuple = 35, RuleLvalue = 36, RuleBuiltin_function = 37, RulePrint_function = 38, 
+    RuleInt_function = 39, RuleBool_function = 40, RuleStr_function = 41, 
+    RuleFloat_function = 42
   };
 
   explicit Python3Parser(antlr4::TokenStream *input);
@@ -70,9 +70,8 @@ public:
   class While_stmtContext;
   class SuiteContext;
   class FuncdefContext;
-  class ParametersContext;
-  class TypedargslistContext;
-  class TfpdefContext;
+  class Funcdef_argsContext;
+  class Funcdef_argContext;
   class Simple_stmtContext;
   class Small_stmtContext;
   class Flow_stmtContext;
@@ -216,7 +215,9 @@ public:
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *DEF();
     antlr4::tree::TerminalNode *NAME();
-    ParametersContext *parameters();
+    antlr4::tree::TerminalNode *OPEN_PAREN();
+    Funcdef_argsContext *funcdef_args();
+    antlr4::tree::TerminalNode *CLOSE_PAREN();
     antlr4::tree::TerminalNode *COLON();
     SuiteContext *suite();
 
@@ -227,31 +228,12 @@ public:
 
   FuncdefContext* funcdef();
 
-  class  ParametersContext : public antlr4::ParserRuleContext {
+  class  Funcdef_argsContext : public antlr4::ParserRuleContext {
   public:
-    ParametersContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    Funcdef_argsContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *OPEN_PAREN();
-    antlr4::tree::TerminalNode *CLOSE_PAREN();
-    TypedargslistContext *typedargslist();
-
-
-    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  ParametersContext* parameters();
-
-  class  TypedargslistContext : public antlr4::ParserRuleContext {
-  public:
-    TypedargslistContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    std::vector<TfpdefContext *> tfpdef();
-    TfpdefContext* tfpdef(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> ASSIGN();
-    antlr4::tree::TerminalNode* ASSIGN(size_t i);
-    std::vector<ExprContext *> expr();
-    ExprContext* expr(size_t i);
+    std::vector<Funcdef_argContext *> funcdef_arg();
+    Funcdef_argContext* funcdef_arg(size_t i);
     std::vector<antlr4::tree::TerminalNode *> COMMA();
     antlr4::tree::TerminalNode* COMMA(size_t i);
 
@@ -260,20 +242,22 @@ public:
    
   };
 
-  TypedargslistContext* typedargslist();
+  Funcdef_argsContext* funcdef_args();
 
-  class  TfpdefContext : public antlr4::ParserRuleContext {
+  class  Funcdef_argContext : public antlr4::ParserRuleContext {
   public:
-    TfpdefContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    Funcdef_argContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAME();
+    antlr4::tree::TerminalNode *ASSIGN();
+    ExprContext *expr();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
-  TfpdefContext* tfpdef();
+  Funcdef_argContext* funcdef_arg();
 
   class  Simple_stmtContext : public antlr4::ParserRuleContext {
   public:
@@ -669,10 +653,10 @@ public:
     Function_callContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *OPEN_PAREN();
+    ArglistContext *arglist();
     antlr4::tree::TerminalNode *CLOSE_PAREN();
     Builtin_functionContext *builtin_function();
     LvalueContext *lvalue();
-    ArglistContext *arglist();
 
 
     virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
