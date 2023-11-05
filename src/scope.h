@@ -49,6 +49,46 @@ class NameSpace {
     throw std::runtime_error("NameError: name '" + name + "' is not defined");
     return nullptr;
   }
+  VariablePtr get(lvalueTuple &lvalue) {
+    auto res = std::vector<VariablePtr>();
+    res.reserve(lvalue.size());
+    for (auto &name : lvalue) {
+      res.push_back(get(name));
+    }
+    return static_cast<VariablePtr>(std::make_shared<PyTuple>(res));
+  }
+  void assign(lvalueTuple &lvalue, const VariablePtr &var) {
+    auto tuple = std::dynamic_pointer_cast<PyTuple>(var);
+    if (tuple == nullptr) {
+      throw std::runtime_error("TypeError: can only assign an iterable");
+    }
+    if (tuple->value.size() != lvalue.size()) {
+      if (tuple->value.size() > lvalue.size()) {
+        throw std::runtime_error("ValueError: too many values to unpack (expected " +
+            std::to_string(lvalue.size()) + ")");
+      } else {
+        throw std::runtime_error("ValueError: not enough values to unpack (expected " +
+            std::to_string(lvalue.size()) + ", got " + std::to_string(tuple->value.size()) + ")");
+      }
+    }
+    for (auto i = 0; i < lvalue.size(); ++i) {
+      assign(lvalue[i], tuple->value[i]);
+    }
+  }
+  std::string printVariables() {
+    // for debugging
+    auto res = std::string();
+    res += "== Global Scope ==\n";
+    for (auto &item : scopes.front()) {
+      res += item.first + " = " + item.second->toString().value + "\n";
+    }
+    if (!InGlobalScope()) {
+      res += "== Local Scope ==\n";
+      for (auto &item : scopes.back()) {
+        res += item.first + " = " + item.second->toString().value + "\n";
+      }
+    }
+  }
 };
 
 #endif //PYTHON_INTERPRETER_INCLUDE_SCOPE_SCOPE_H_

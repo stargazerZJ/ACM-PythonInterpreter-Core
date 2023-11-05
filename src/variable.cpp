@@ -51,9 +51,9 @@ bool VariableBase::lessThan(const VariableBase &rhs) const {
   raiseTypeError(rhs);
   return false;
 }
-VariablePtr VariableBase::equal(const VariableBase &rhs) const {
+bool VariableBase::equal(const VariableBase &rhs) const {
   raiseTypeError(rhs);
-  return nullptr;
+  return false;
 }
 bool VariableBase::isNumeric() const {
   return false;
@@ -156,17 +156,17 @@ bool PyInt::lessThan(const VariableBase &rhs) const {
     return false;
   }
 }
-VariablePtr PyInt::equal(const VariableBase &rhs) const {
+bool PyInt::equal(const VariableBase &rhs) const {
   auto rhs_ptr = &rhs;
   if (auto rhs_int = dynamic_cast<const PyInt *>(rhs_ptr)) {
-    return std::make_shared<PyBool>(value == rhs_int->value);
+    return value == rhs_int->value;
   } else if (dynamic_cast<const PyFloat *>(rhs_ptr)) {
     return toFloat().equal(rhs);
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
-    return std::make_shared<PyBool>(value == rhs_bool->toInt().value);
+    return value == rhs_bool->toInt().value;
   } else {
     raiseTypeError(rhs);
-    return nullptr;
+    return false;
   }
 }
 std::string PyInt::typeName() const {
@@ -248,12 +248,12 @@ bool PyFloat::lessThan(const VariableBase &rhs) const {
     return false;
   }
 }
-VariablePtr PyFloat::equal(const VariableBase &rhs) const {
+bool PyFloat::equal(const VariableBase &rhs) const {
   if (rhs.isNumeric()) {
-    return std::make_shared<PyBool>(value == rhs.toFloat().value);
+    return value == rhs.toFloat().value;
   } else {
     raiseTypeError(rhs);
-    return nullptr;
+    return false;
   }
 }
 std::string PyFloat::typeName() const {
@@ -303,13 +303,13 @@ bool PyString::lessThan(const VariableBase &rhs) const {
     return false;
   }
 }
-VariablePtr PyString::equal(const VariableBase &rhs) const {
+bool PyString::equal(const VariableBase &rhs) const {
   auto rhs_ptr = &rhs;
   if (auto rhs_string = dynamic_cast<const PyString *>(rhs_ptr)) {
-    return std::make_shared<PyBool>(value == rhs_string->value);
+    return value == rhs_string->value;
   } else {
     raiseTypeError(rhs);
-    return nullptr;
+    return false;
   }
 }
 std::string PyString::typeName() const {
@@ -351,7 +351,7 @@ VariablePtr PyBool::mod(const VariableBase &rhs) const {
 bool PyBool::lessThan(const VariableBase &rhs) const {
   return toInt().lessThan(rhs);
 }
-VariablePtr PyBool::equal(const VariableBase &rhs) const {
+bool PyBool::equal(const VariableBase &rhs) const {
   return toInt().equal(rhs);
 }
 std::string PyBool::typeName() const {
@@ -364,9 +364,88 @@ PyString PyNone::toString() const {
 PyBool PyNone::toBool() const {
   return PyBool(false);
 }
-VariablePtr PyNone::equal(const VariableBase &rhs) const {
-  return std::make_shared<PyBool>(dynamic_cast<const PyNone *>(&rhs) != nullptr);
+bool PyNone::equal(const VariableBase &rhs) const {
+  return dynamic_cast<const PyNone *>(&rhs) != nullptr;
 }
 std::string PyNone::typeName() const {
   return "'NoneType'";
+}
+std::string PyTuple::typeName() const {
+  return "'tuple'";
+}
+PyString PyTuple::toString() const {
+  std::string result = "(";
+  for (auto &item : value) {
+    result += item->toString().value + ", ";
+  }
+  if (!value.empty()) {
+    result.pop_back();
+    if (value.size() > 1) {
+      result.pop_back();
+    }
+  }
+  result += ")";
+  return PyString(result);
+}
+PyBool PyTuple::toBool() const {
+  return PyBool(!value.empty());
+}
+VariablePtr PyTuple::add(const VariableBase &rhs) const {
+  auto rhs_ptr = &rhs;
+  if (auto rhs_tuple = dynamic_cast<const PyTuple *>(rhs_ptr)) {
+    auto result = std::make_shared<PyTuple>(*this);
+    result->value.insert(result->value.end(), rhs_tuple->value.begin(), rhs_tuple->value.end());
+    return result;
+  } else {
+    raiseTypeError(rhs);
+    return nullptr;
+  }
+}
+VariablePtr PyTuple::mul(const VariableBase &rhs) const {
+  auto rhs_ptr = &rhs;
+  if (auto rhs_int = dynamic_cast<const PyInt *>(rhs_ptr)) {
+    auto result = std::make_shared<PyTuple>();
+    long long times = rhs_int->value.toLongLong();
+    for (int i = 0; i < times; ++i) {
+      result->value.insert(result->value.end(), value.begin(), value.end());
+    }
+    return result;
+  } else {
+    raiseTypeError(rhs);
+    return nullptr;
+  }
+}
+bool PyTuple::lessThan(const VariableBase &rhs) const {
+  auto rhs_ptr = &rhs;
+  if (auto rhs_tuple = dynamic_cast<const PyTuple *>(rhs_ptr)) {
+    if (value.size() != rhs_tuple->value.size()) {
+      return value.size() < rhs_tuple->value.size();
+    }
+    for (int i = 0; i < value.size(); ++i) {
+      if (!value[i]->equal(*rhs_tuple->value[i])) {
+        return value[i]->lessThan(*rhs_tuple->value[i]);
+      }
+    }
+    return false;
+  } else {
+    raiseTypeError(rhs);
+    return false;
+  }
+}
+bool PyTuple::equal(const VariableBase &rhs) const {
+  auto rhs_ptr = &rhs;
+  if (auto rhs_tuple = dynamic_cast<const PyTuple *>(rhs_ptr)) {
+    if (value.size() != rhs_tuple->value.size()) {
+      return false;
+    }
+    for (int i = 0; i < value.size(); ++i) {
+      if (!value[i]->equal(*rhs_tuple->value[i])) {
+        return false;
+      }
+    }
+    return true;
+  } else {
+    raiseTypeError(rhs);
+    return false;
+  }
 }

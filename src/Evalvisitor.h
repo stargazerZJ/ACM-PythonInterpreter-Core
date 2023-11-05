@@ -7,6 +7,7 @@
 #include "scope.h"
 #include "variable.h"
 #include "utils.h"
+#include <ranges>
 
 
 class EvalVisitor : public Python3ParserBaseVisitor {
@@ -26,6 +27,13 @@ private:
   std::any visitBreak_stmt(Python3Parser::Break_stmtContext *ctx) override;
   std::any visitContinue_stmt(Python3Parser::Continue_stmtContext *ctx) override;
   std::any visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) override;
+  std::any visitSuite(Python3Parser::SuiteContext *ctx) override;
+  std::any visitIf_stmt(Python3Parser::If_stmtContext *ctx) override;
+  std::any visitWhile_stmt(Python3Parser::While_stmtContext *ctx) override;
+  std::any visitLvalue(Python3Parser::LvalueContext *ctx) override;
+  std::any visitAugassign_stmt(Python3Parser::Augassign_stmtContext *ctx) override;
+  std::any visitRvalue_tuple(Python3Parser::Rvalue_tupleContext *ctx) override;
+  std::any visitAssign_stmt(Python3Parser::Assign_stmtContext *ctx) override;
 };
 
 

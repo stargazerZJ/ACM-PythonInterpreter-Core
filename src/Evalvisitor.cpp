@@ -87,11 +87,14 @@ std::any EvalVisitor::visitFunction_call(Python3Parser::Function_callContext *ct
   throw std::runtime_error("parse error in function_call");
 }
 std::any EvalVisitor::visitLvalue_tuple(Python3Parser::Lvalue_tupleContext *ctx) {
+  if (ctx->COMMA().empty()) {
+    return visitLvalue(ctx->lvalue(0));
+  }
   auto lvalues = ctx->lvalue();
   auto res = lvalueTuple();
   res.reserve(lvalues.size());
   for (auto lvalue : lvalues) {
-    res.emplace_back(lvalue->NAME()->toString());
+    res.emplace_back(std::any_cast<std::string>(lvalue));
   }
   return res;
 }
@@ -256,4 +259,107 @@ std::any EvalVisitor::visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) {
     return PyFlow(PyFlow::Type::RETURN, visit(ctx->rvalue_tuple()));
   }
   return PyFlow(PyFlow::Type::RETURN);
+}
+std::any EvalVisitor::visitSuite(Python3Parser::SuiteContext *ctx) {
+  if (ctx->simple_stmt()) {
+    visit(ctx->simple_stmt());
+    return nullptr;
+  }
+  auto statements = ctx->stmt();
+  for (auto stmt : statements) {
+    auto res = visit(stmt);
+    if (std::any_cast<PyFlow>(&res)) {
+      return res;
+    }
+  }
+  return nullptr;
+}
+std::any EvalVisitor::visitIf_stmt(Python3Parser::If_stmtContext *ctx) {
+  auto tests = ctx->expr();
+  auto suites = ctx->suite();
+  for (size_t i = 0; i < tests.size(); ++i) {
+    auto res = std::any_cast<VariablePtr>(visit(tests[i]));
+    if (res->toBool().value) {
+      return visit(suites[i]);
+    }
+  }
+  if (ctx->ELSE()) {
+    return visit(suites.back());
+  }
+  return nullptr;
+}
+std::any EvalVisitor::visitWhile_stmt(Python3Parser::While_stmtContext *ctx) {
+  auto test = ctx->expr();
+  auto suite = ctx->suite();
+  while (true) {
+    auto res = std::any_cast<VariablePtr>(visit(test));
+    if (!res->toBool().value) {
+      break;
+    }
+    auto flow = visit(suite);
+    if (auto py_flow = std::any_cast<PyFlow>(&flow)) {
+      if (py_flow->type == PyFlow::Type::BREAK) {
+        break;
+      }
+      if (py_flow->type == PyFlow::Type::CONTINUE) {
+        continue;
+      }
+      return flow;
+    }
+  }
+  return nullptr;
+}
+std::any EvalVisitor::visitLvalue(Python3Parser::LvalueContext *ctx) {
+  return ctx->NAME()->toString();
+}
+std::any EvalVisitor::visitAugassign_stmt(Python3Parser::Augassign_stmtContext *ctx) {
+  auto lvalue = std::any_cast<std::string>(visit(ctx->lvalue()));
+  auto rhs = std::any_cast<VariablePtr>(visit(ctx->expr()));
+  auto lhs = name_space.get(lvalue);
+  if (ctx->augassign()->ADD_ASSIGN()) {
+    name_space.assign(lvalue, lhs->add(*rhs));
+  } else if (ctx->augassign()->SUB_ASSIGN()) {
+    name_space.assign(lvalue, lhs->sub(*rhs));
+  } else if (ctx->augassign()->MULT_ASSIGN()) {
+    name_space.assign(lvalue, lhs->mul(*rhs));
+  } else if (ctx->augassign()->DIV_ASSIGN()) {
+    name_space.assign(lvalue, lhs->div(*rhs));
+  } else if (ctx->augassign()->IDIV_ASSIGN()) {
+    name_space.assign(lvalue, lhs->floor_div(*rhs));
+  } else if (ctx->augassign()->MOD_ASSIGN()) {
+    name_space.assign(lvalue, lhs->mod(*rhs));
+  } else {
+    throw std::runtime_error("parse error in augassign_stmt");
+  }
+  std::cerr << name_space.printVariables() << std::endl;
+  return nullptr;
+}
+std::any EvalVisitor::visitRvalue_tuple(Python3Parser::Rvalue_tupleContext *ctx) {
+  if (ctx->COMMA().empty()) {
+    return visit(ctx->expr(0));
+  }
+  auto expressions = ctx->expr();
+  auto res = std::vector<VariablePtr>();
+  res.reserve(expressions.size());
+  for (auto expr : expressions) {
+    res.push_back(std::any_cast<VariablePtr>(visit(expr)));
+  }
+  return static_cast<VariablePtr>(std::make_shared<PyTuple>(res));
+}
+std::any EvalVisitor::visitAssign_stmt(Python3Parser::Assign_stmtContext *ctx) {
+  auto rhs = std::any_cast<VariablePtr>(visit(ctx->rvalue_tuple()));
+  auto lvalues = ctx->lvalue_tuple();
+  for (auto lvalue_context : std::ranges::reverse_view(lvalues)) {
+    auto lvalue = visit(lvalue_context);
+    if (auto lhs = std::any_cast<std::string>(&lvalue)) {
+      name_space.assign(*lhs, rhs);
+      rhs = name_space.get(*lhs);
+    } else {
+      auto lhs_tuple = std::any_cast<lvalueTuple>(lvalue);
+      name_space.assign(lhs_tuple, rhs);
+      rhs = name_space.get(lhs_tuple);
+    }
+  }
+  std::cerr << name_space.printVariables() << std::endl;
+  return nullptr;
 }

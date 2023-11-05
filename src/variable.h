@@ -18,8 +18,8 @@ struct PyFloat;
 struct PyString;
 struct PyBool;
 struct PyNone;
-struct PyFunc;
 struct PyTuple;
+struct PyFunc;
 struct PyFuncArgs;
 struct PyFlow;
 
@@ -44,7 +44,7 @@ struct VariableBase {
   [[nodiscard]] virtual VariablePtr floor_div(const VariableBase &rhs) const;
   [[nodiscard]] virtual VariablePtr mod(const VariableBase &rhs) const;
   [[nodiscard]] virtual bool lessThan(const VariableBase &rhs) const;
-  [[nodiscard]] virtual VariablePtr equal(const VariableBase &rhs) const;
+  [[nodiscard]] virtual bool equal(const VariableBase &rhs) const;
 };
 
 struct PyInt : public VariableBase {
@@ -65,7 +65,7 @@ struct PyInt : public VariableBase {
   [[nodiscard]] VariablePtr floor_div(const VariableBase &rhs) const override;
   [[nodiscard]] VariablePtr mod(const VariableBase &rhs) const override;
   [[nodiscard]] bool lessThan(const VariableBase &rhs) const override;
-  [[nodiscard]] VariablePtr equal(const VariableBase &rhs) const override;
+  [[nodiscard]] bool equal(const VariableBase &rhs) const override;
 };
 
 struct PyFloat : public VariableBase {
@@ -84,7 +84,7 @@ struct PyFloat : public VariableBase {
   [[nodiscard]] VariablePtr floor_div(const VariableBase &rhs) const override;
   [[nodiscard]] VariablePtr mod(const VariableBase &rhs) const override;
   [[nodiscard]] bool lessThan(const VariableBase &rhs) const override;
-  [[nodiscard]] VariablePtr equal(const VariableBase &rhs) const override;
+  [[nodiscard]] bool equal(const VariableBase &rhs) const override;
 };
 
 struct PyString : public VariableBase {
@@ -98,7 +98,7 @@ struct PyString : public VariableBase {
   [[nodiscard]] VariablePtr add(const VariableBase &rhs) const override;
   [[nodiscard]] VariablePtr mul(const VariableBase &rhs) const override;
   [[nodiscard]] bool lessThan(const VariableBase &rhs) const override;
-  [[nodiscard]] VariablePtr equal(const VariableBase &rhs) const override;
+  [[nodiscard]] bool equal(const VariableBase &rhs) const override;
 };
 
 struct PyBool : public VariableBase {
@@ -117,14 +117,27 @@ struct PyBool : public VariableBase {
   [[nodiscard]] VariablePtr floor_div(const VariableBase &rhs) const override;
   [[nodiscard]] VariablePtr mod(const VariableBase &rhs) const override;
   [[nodiscard]] bool lessThan(const VariableBase &rhs) const override;
-  [[nodiscard]] VariablePtr equal(const VariableBase &rhs) const override;
+  [[nodiscard]] bool equal(const VariableBase &rhs) const override;
 };
 
 struct PyNone : public VariableBase {
   [[nodiscard]] std::string typeName() const override;
   [[nodiscard]] PyString toString() const override;
   [[nodiscard]] PyBool toBool() const override;
-  [[nodiscard]] VariablePtr equal(const VariableBase &rhs) const override;
+  [[nodiscard]] bool equal(const VariableBase &rhs) const override;
+};
+
+struct PyTuple : public VariableBase {
+  explicit PyTuple() = default;
+  explicit PyTuple(std::vector<VariablePtr> value) : value(std::move(value)) {}
+  std::vector<VariablePtr> value;
+  [[nodiscard]] std::string typeName() const override;
+  [[nodiscard]] PyString toString() const override;
+  [[nodiscard]] PyBool toBool() const override;
+  [[nodiscard]] VariablePtr add(const VariableBase &rhs) const override;
+  [[nodiscard]] VariablePtr mul(const VariableBase &rhs) const override;
+  [[nodiscard]] bool lessThan(const VariableBase &rhs) const override;
+  [[nodiscard]] bool equal(const VariableBase &rhs) const override;
 };
 
 struct PyFlow {

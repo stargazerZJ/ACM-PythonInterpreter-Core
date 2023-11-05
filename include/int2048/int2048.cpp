@@ -432,7 +432,7 @@ high_precision::int2048 high_precision::multiplyInt(high_precision::int2048 lhs,
 }
 double high_precision::int2048::toDouble() const {
   double res = 0;
-  for (unsigned long long it : std::ranges::reverse_view(num_)) {
+  for (num_t it : std::ranges::reverse_view(num_)) {
     res = res * kBase + it;
   }
   if (std::isinf(res)) {
