@@ -30,8 +30,12 @@ std::any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx) {
     return static_cast<VariablePtr>(std::make_shared<PyNone>());
   } else if (ctx->function_call()) {
     return visitFunction_call(ctx->function_call());
-  } else if (ctx->expr()) {
-    return visitExpr(ctx->expr());
+  } else if (ctx->OPEN_PAREN()) {
+    if (ctx->rvalue_tuple()) {
+      return visitRvalue_tuple(ctx->rvalue_tuple());
+    } else {
+      return static_cast<VariablePtr>(std::make_shared<PyTuple>());
+    }
   }
   throw std::runtime_error("parse error in atom");
 }

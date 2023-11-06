@@ -48,7 +48,7 @@ term: factor (muldivmod_op factor)*;
 muldivmod_op: '*'|'/'|'//'|'%';
 factor: ('+'|'-') factor | atom;
 
-atom: (NAME | NUMBER | STRING+| 'None' | 'True' | 'False' | ('(' expr ')') | function_call);
+atom: (NAME | NUMBER | STRING+| 'None' | 'True' | 'False' | ('(' rvalue_tuple? ')') | function_call);
 //atom: (NAME | INTEGER | FLOAT_NUMBER | STRING+| 'None' | 'True' | 'False' | ('(' expr ')') | function_call);
 //atom_test: (NAME | INTEGER | STRING+| 'None' | 'True' | 'False' | ('(' expr ')') | function_call);
 arglist: (argument (',' argument)*  (',')?)?;
