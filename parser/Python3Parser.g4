@@ -57,8 +57,8 @@ argument: ( expr |
 
 function_call: (builtin_function | lvalue) '(' arglist ')';
 
-lvalue_tuple: lvalue (',' lvalue)* (',')?;
-lvalue: NAME;
+lvalue_tuple: '(' lvalue_tuple ')' | lvalue (',' lvalue)* (',')?;
+lvalue: '(' lvalue ')' | NAME;
 builtin_function: (print_function | int_function | bool_function | str_function | float_function);
 print_function: 'print';
 int_function: 'int';

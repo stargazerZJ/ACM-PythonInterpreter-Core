@@ -45,15 +45,16 @@ std::any EvalVisitor::visitFunction_call(Python3Parser::Function_callContext *ct
     }
     auto call_args = std::any_cast<FunctionCallArgs>(visit(ctx->arglist()));
     auto args = func->matchParams(call_args);
-    name_space_.addScope();
+    auto &scope = name_space_.addScope();
 //    for(auto name : func->args.names) {
 //      std::cerr << "name" <<
 //    }
     for (size_t i = 0; i < args.size(); ++i) {
 //      std::cerr << "Argument Assign: " << func->args.names[i] << " = " << args[i]->toString().value
 //                << std::endl;
-      name_space_.assign(func->args.names[i], args[i]);
+      scope[func->args.names[i]] = args[i];
     }
+//    std::cerr << name_space_.printVariables();
     auto res = visit(func->body);
     name_space_.popScope();
     if (auto py_flow = std::any_cast<PyFlow>(&res)) {
@@ -105,16 +106,20 @@ std::any EvalVisitor::visitFunction_call(Python3Parser::Function_callContext *ct
   throw std::runtime_error("parse error in function_call");
 }
 std::any EvalVisitor::visitLvalue_tuple(Python3Parser::Lvalue_tupleContext *ctx) {
-  if (ctx->COMMA().empty()) {
-    return visitLvalue(ctx->lvalue(0));
+  if (ctx->lvalue_tuple()) {
+    return visitLvalue_tuple(ctx->lvalue_tuple());
+  } else {
+    if (ctx->COMMA().empty()) {
+      return visitLvalue(ctx->lvalue(0));
+    }
+    auto lvalues = ctx->lvalue();
+    auto res = lvalueTuple();
+    res.reserve(lvalues.size());
+    for (auto lvalue : lvalues) {
+      res.emplace_back(std::any_cast<std::string>(visitLvalue(lvalue)));
+    }
+    return res;
   }
-  auto lvalues = ctx->lvalue();
-  auto res = lvalueTuple();
-  res.reserve(lvalues.size());
-  for (auto lvalue : lvalues) {
-    res.emplace_back(std::any_cast<std::string>(visitLvalue(lvalue)));
-  }
-  return res;
 }
 std::any EvalVisitor::visitFactor(Python3Parser::FactorContext *ctx) {
   if (ctx->MINUS()) {
@@ -325,7 +330,11 @@ std::any EvalVisitor::visitWhile_stmt(Python3Parser::While_stmtContext *ctx) {
   return nullptr;
 }
 std::any EvalVisitor::visitLvalue(Python3Parser::LvalueContext *ctx) {
-  return ctx->NAME()->toString();
+  if (ctx->lvalue()) {
+    return visitLvalue(ctx->lvalue());
+  } else {
+    return ctx->NAME()->toString();
+  }
 }
 std::any EvalVisitor::visitAugassign_stmt(Python3Parser::Augassign_stmtContext *ctx) {
   auto lvalue = std::any_cast<std::string>(visit(ctx->lvalue()));

@@ -23,8 +23,9 @@ class NameSpace {
   bool InGlobalScope() {
     return scopes_.size() == 1;
   }
-  void addScope() {
+  Scope & addScope() {
     scopes_.emplace_back();
+    return scopes_.back();
   }
   void popScope() {
     scopes_.pop_back();

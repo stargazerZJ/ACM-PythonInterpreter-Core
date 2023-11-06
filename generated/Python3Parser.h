@@ -669,6 +669,9 @@ public:
   public:
     Lvalue_tupleContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *OPEN_PAREN();
+    Lvalue_tupleContext *lvalue_tuple();
+    antlr4::tree::TerminalNode *CLOSE_PAREN();
     std::vector<LvalueContext *> lvalue();
     LvalueContext* lvalue(size_t i);
     std::vector<antlr4::tree::TerminalNode *> COMMA();
@@ -685,6 +688,9 @@ public:
   public:
     LvalueContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *OPEN_PAREN();
+    LvalueContext *lvalue();
+    antlr4::tree::TerminalNode *CLOSE_PAREN();
     antlr4::tree::TerminalNode *NAME();
 
 
