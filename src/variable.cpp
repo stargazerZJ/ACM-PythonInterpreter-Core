@@ -293,6 +293,12 @@ VariablePtr PyString::mul(const VariableBase &rhs) const {
       result += value;
     }
     return std::make_shared<PyString>(result);
+  } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
+    if (rhs_bool->value) {
+      return std::make_shared<PyString>(value);
+    } else {
+      return std::make_shared<PyString>("");
+    }
   } else {
     raiseTypeError(rhs);
     return nullptr;

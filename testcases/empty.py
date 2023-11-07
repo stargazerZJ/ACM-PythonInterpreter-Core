@@ -1,8 +1,11 @@
+print("a" * 1, "b" * True, "c" * False)
+
 def f():
     a = 1
     print(a)
 
 f()
+(f)()
 # print(a)
 
 def g(b):
