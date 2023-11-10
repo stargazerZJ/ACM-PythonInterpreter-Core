@@ -467,25 +467,15 @@ PyBool PyFunc::toBool() const {
   return PyBool(true);
 }
 std::vector<VariablePtr> PyFunc::matchParams(FunctionCallArgs call_args) const {
-  if (!(args.min_args <= call_args.args.size() && call_args.args.size() <= args.names.size())) {
-    if (args.min_args > call_args.args.size()) {
-      std::string missing_args;
-      for (size_t i = call_args.args.size(); i < args.min_args; ++i) {
-        missing_args += "'" + args.names[i] + "'";
-        if (i != args.min_args - 1) {
-          missing_args += " and ";
-        }
-      }
-      throw std::runtime_error(
-          "TypeError: " + name + "() missing " + std::to_string(args.min_args - call_args.args.size())
-              + " required positional arguments: " + missing_args);
-    } else {
-      throw std::runtime_error(
-          "TypeError: " + name + "() takes from " + std::to_string(args.min_args)
-              + " to " + std::to_string(args.names.size())
-              + " positional arguments but "
-              + std::to_string(call_args.args.size()) + " were given");
-    }
+  if (args.min_args > args.names.size()) {
+    throw std::runtime_error("parse error: min_args > names.size()");
+  }
+  if (call_args.args.size() > args.names.size()) {
+    throw std::runtime_error(
+        "TypeError: " + name + "() takes from " + std::to_string(args.min_args)
+            + " to " + std::to_string(args.names.size())
+            + " positional arguments but "
+            + std::to_string(call_args.args.size()) + " were given");
   }
   std::vector<VariablePtr> param_values(args.names.size());
   for (size_t i = 0; i < call_args.args.size(); ++i) {
@@ -507,6 +497,19 @@ std::vector<VariablePtr> PyFunc::matchParams(FunctionCallArgs call_args) const {
   if (!call_args.kwargs.empty()) {
     throw std::runtime_error("TypeError: " + name + "() got an unexpected keyword argument '"
                                  + call_args.kwargs.begin()->first + "'");
+  }
+  size_t missing_args_count = 0;
+  std::string missing_args;
+  for (size_t i = call_args.args.size(); i < args.min_args; ++i) {
+    if (param_values[i] == nullptr) {
+      missing_args += "'" + args.names[i] + "' and ";
+      ++missing_args_count;
+    }
+  }
+  if (missing_args_count) {
+    missing_args = missing_args.substr(0, missing_args.size() - 5);
+    throw std::runtime_error("TypeError: " + name + "() missing " + std::to_string(missing_args_count)
+                                 + " required positional argument: " + missing_args);
   }
   return param_values;
 }
