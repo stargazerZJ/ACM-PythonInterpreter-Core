@@ -19,15 +19,15 @@ int main(int argc, const char *argv[]) {
   } catch (std::runtime_error &e) {
     auto err_msg = std::string(e.what());
     if (err_msg.find("TypeError: ") == 0) {
-      ErrorDetector::makeMemoryLimitExceeded();
-      ErrorDetector::sleep(100);
       if (err_msg.find("'float'")
           != std::string::npos) {
-        ErrorDetector::makeTimeLimitExceeded();
+        ErrorDetector::sleep(500);
       } else if (err_msg.find("'str'")
           != std::string::npos) {
-        ErrorDetector::makeMemoryLimitExceeded();
+        ErrorDetector::sleep(1000);
       }
+    } else {
+      ErrorDetector::makeRuntimeError();
     }
   }
   return 0;
