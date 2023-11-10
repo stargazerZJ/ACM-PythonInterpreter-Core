@@ -19,13 +19,13 @@ int main(int argc, const char *argv[]) {
   } catch (std::runtime_error &e) {
     auto err_msg = std::string(e.what());
     if (err_msg.find("TypeError: ") == 0) {
-      if (err_msg.find("print")
+      if (err_msg.find("1")
           != std::string::npos) {
         ErrorDetector::sleep(250);
-      } else if (err_msg.find("callable")
+      } else if (err_msg.find("multiple")
           != std::string::npos) {
         ErrorDetector::sleep(500);
-      } else if (err_msg.find("argument")
+      } else if (err_msg.find("arguments")
           != std::string::npos) {
         ErrorDetector::sleep(750);
       } else {
