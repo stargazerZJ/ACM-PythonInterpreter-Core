@@ -56,8 +56,8 @@ std::any EvalVisitor::visitFunction_call(Python3Parser::Function_callContext *ct
     for (size_t i = 0; i < args.size(); ++i) {
 //      std::cerr << "Argument Assign: " << func->args.names[i] << " = " << args[i]->toString().value
 //                << std::endl;
-      scope[func->args.names[i]] = args[i];
-//      name_space_.assign(func->args.names[i], args[i]);
+//      scope[func->args.names[i]] = args[i];
+      name_space_.assign(func->args.names[i], args[i]);
     }
 //    std::cerr << name_space_.printVariables();
     auto res = visit(func->body);

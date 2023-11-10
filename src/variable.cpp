@@ -171,7 +171,6 @@ bool PyInt::equal(const VariableBase &rhs) const {
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
     return value == rhs_bool->toInt().value;
   } else {
-    raiseTypeError(rhs);
     return false;
   }
 }
@@ -258,7 +257,6 @@ bool PyFloat::equal(const VariableBase &rhs) const {
   if (rhs.isNumeric()) {
     return value == rhs.toFloat().value;
   } else {
-    raiseTypeError(rhs);
     return false;
   }
 }
@@ -320,7 +318,6 @@ bool PyString::equal(const VariableBase &rhs) const {
   if (auto rhs_string = dynamic_cast<const PyString *>(rhs_ptr)) {
     return value == rhs_string->value;
   } else {
-    raiseTypeError(rhs);
     return false;
   }
 }
@@ -457,7 +454,6 @@ bool PyTuple::equal(const VariableBase &rhs) const {
     }
     return true;
   } else {
-    raiseTypeError(rhs);
     return false;
   }
 }

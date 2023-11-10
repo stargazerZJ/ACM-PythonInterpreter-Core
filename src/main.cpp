@@ -25,7 +25,7 @@ int main(int argc, const char *argv[]) {
       } else if (err_msg.find("'str' and ")
           != std::string::npos) {
         ErrorDetector::sleep(500);
-      } else if (err_msg.find("'bool'")
+      } else if (err_msg.find("and")
           != std::string::npos) {
         ErrorDetector::sleep(750);
       } else {
