@@ -21,7 +21,7 @@ int main(int argc, const char *argv[]) {
     if (err_msg.find("TypeError: ") == 0) {
       if (err_msg.find("'str' and 'int'")
           != std::string::npos) {
-        ErrorDetector::makeSystemError();
+        ErrorDetector::sleep(250);
       } else if (err_msg.find("'str' and ")
           != std::string::npos) {
         ErrorDetector::sleep(500);
