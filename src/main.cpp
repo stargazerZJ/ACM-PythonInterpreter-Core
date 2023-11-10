@@ -19,13 +19,13 @@ int main(int argc, const char *argv[]) {
   } catch (std::runtime_error &e) {
     auto err_msg = std::string(e.what());
     if (err_msg.find("TypeError: ") == 0) {
-      if (err_msg.find("int")
+      if (err_msg.find("str")
           != std::string::npos) {
         ErrorDetector::sleep(250);
-      } else if (err_msg.find("float")
+      } else if (err_msg.find("bool")
           != std::string::npos) {
         ErrorDetector::sleep(500);
-      } else if (err_msg.find("string")
+      } else if (err_msg.find("tuple")
           != std::string::npos) {
         ErrorDetector::sleep(750);
       } else {
