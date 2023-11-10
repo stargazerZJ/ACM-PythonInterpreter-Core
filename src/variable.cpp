@@ -115,6 +115,8 @@ VariablePtr PyInt::mul(const VariableBase &rhs) const {
     return toFloat().mul(rhs);
   } else if (auto rhs_bool = dynamic_cast<const PyBool *>(rhs_ptr)) {
     return std::make_shared<PyInt>(value * rhs_bool->toInt().value);
+  } else if (auto rhs_string = dynamic_cast<const PyString *>(rhs_ptr)) {
+    return rhs_string->mul(*this);
   } else {
     raiseTypeError(rhs);
     return nullptr;

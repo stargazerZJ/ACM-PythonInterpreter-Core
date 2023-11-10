@@ -252,13 +252,14 @@ std::any EvalVisitor::visitAnd_test(Python3Parser::And_testContext *ctx) {
     return visit(ctx->not_test(0));
   }
   auto terms = ctx->not_test();
+  auto res = static_cast<VariablePtr>(std::make_shared<PyBool>(true));
   for (auto term : terms) {
-    auto res = std::any_cast<VariablePtr>(visit(term));
+    res = std::any_cast<VariablePtr>(visit(term));
     if (!res->toBool().value) {
-      return static_cast<VariablePtr>(std::make_shared<PyBool>(false));
+      return res;
     }
   }
-  return static_cast<VariablePtr>(std::make_shared<PyBool>(true));
+  return res;
 }
 std::any EvalVisitor::visitOr_test(Python3Parser::Or_testContext *ctx) {
   auto operators = ctx->OR();
@@ -266,13 +267,14 @@ std::any EvalVisitor::visitOr_test(Python3Parser::Or_testContext *ctx) {
     return visit(ctx->and_test(0));
   }
   auto terms = ctx->and_test();
+  auto res = static_cast<VariablePtr>(std::make_shared<PyBool>(false));
   for (auto term : terms) {
-    auto res = std::any_cast<VariablePtr>(visit(term));
+    res = std::any_cast<VariablePtr>(visit(term));
     if (res->toBool().value) {
-      return static_cast<VariablePtr>(std::make_shared<PyBool>(true));
+      return res;
     }
   }
-  return static_cast<VariablePtr>(std::make_shared<PyBool>(false));
+  return res;
 }
 std::any EvalVisitor::visitBreak_stmt(Python3Parser::Break_stmtContext *ctx) {
   return PyFlow(PyFlow::Type::BREAK);

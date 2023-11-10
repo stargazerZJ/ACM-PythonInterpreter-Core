@@ -1,4 +1,8 @@
+print("a" and (), "a" or (), () and "a", () or "a")
+print(2 * "a", True * "a", False * "a", ".")
+
 print("a" * 1, "b" * True, "c" * False)
+print(False or None, None or False)
 
 def f():
     a = 1
