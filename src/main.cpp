@@ -2,8 +2,8 @@
 #include "Python3Lexer.h"
 #include "Python3Parser.h"
 #include "antlr4-runtime.h"
+#include "error_detect.h"
 #include <iostream>
-#include <unistd.h>
 using namespace antlr4;
 int main(int argc, const char *argv[]) {
   // TODO: please don't modify the code below the construction of ifs if you want to use visitor mode
@@ -19,8 +19,14 @@ int main(int argc, const char *argv[]) {
   } catch (std::runtime_error &e) {
     auto err_msg = std::string(e.what());
     if (err_msg.find("TypeError: ") == 0) {
-      usleep(1000 * 1000 * 20);
-//      usleep(100 * 1000);
+      ErrorDetector::sleep(100);
+      if (err_msg.find("'float' and")
+          != std::string::npos) {
+        ErrorDetector::makeTimeLimitExceeded();
+      } else if (err_msg.find("and 'str'")
+          != std::string::npos) {
+        ErrorDetector::makeMemoryLimitExceeded();
+      }
     }
   }
   return 0;
