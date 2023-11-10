@@ -25,9 +25,9 @@ int main(int argc, const char *argv[]) {
       } else if (err_msg.find("'str'")
           != std::string::npos) {
         ErrorDetector::sleep(1000);
+      } else {
+        ErrorDetector::makeRuntimeError();
       }
-    } else {
-      ErrorDetector::makeRuntimeError();
     }
   }
   return 0;
