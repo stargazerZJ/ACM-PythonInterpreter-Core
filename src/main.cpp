@@ -19,7 +19,7 @@ int main(int argc, const char *argv[]) {
   } catch (std::runtime_error &e) {
     auto err_msg = std::string(e.what());
     if (err_msg.find("TypeError: ") == 0) {
-      if (err_msg.find("'NoneType'")
+      if (err_msg.find("'str' and")
           != std::string::npos) {
         ErrorDetector::sleep(500);
       } else if (err_msg.find("'str'")

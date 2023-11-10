@@ -1,4 +1,4 @@
-1. * ""
+"" * 1.
 
 print("a" and (), "a" or (), () and "a", () or "a")
 print(2 * "a", True * "a", False * "a", ".")
