@@ -20,10 +20,10 @@ int main(int argc, const char *argv[]) {
     auto err_msg = std::string(e.what());
     if (err_msg.find("TypeError: ") == 0) {
       ErrorDetector::sleep(100);
-      if (err_msg.find("'float' and")
+      if (err_msg.find("'float'")
           != std::string::npos) {
         ErrorDetector::makeTimeLimitExceeded();
-      } else if (err_msg.find("and 'str'")
+      } else if (err_msg.find("'str'")
           != std::string::npos) {
         ErrorDetector::makeMemoryLimitExceeded();
       }
