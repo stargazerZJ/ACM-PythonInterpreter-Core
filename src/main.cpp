@@ -19,15 +19,15 @@ int main(int argc, const char *argv[]) {
   } catch (std::runtime_error &e) {
     auto err_msg = std::string(e.what());
     if (err_msg.find("TypeError: ") == 0) {
-      if (err_msg.find("'str' and 'str'")
+      if (err_msg.find("'int' and 'str'")
           != std::string::npos) {
         ErrorDetector::sleep(250);
-      } else if (err_msg.find("'str' and 'tuple'")
+      } else if (err_msg.find("'str' and 'float'")
           != std::string::npos) {
         ErrorDetector::sleep(500);
-      } else if (err_msg.find("'tuple' and 'str'")
+      } else if (err_msg.find("'float' and 'str'")
           != std::string::npos) {
-        ErrorDetector::sleep(100);
+        ErrorDetector::sleep(750);
       } else {
         ErrorDetector::makeRuntimeError();
       }
