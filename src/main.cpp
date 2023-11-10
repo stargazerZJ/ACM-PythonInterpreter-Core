@@ -18,14 +18,15 @@ int main(int argc, const char *argv[]) {
     visitor.visit(tree);
   } catch (std::runtime_error &e) {
     auto err_msg = std::string(e.what());
+    std::cerr << err_msg << std::endl;
     if (err_msg.find("TypeError: ") == 0) {
-      if (err_msg.find("1")
+      if (err_msg.find("missing")
           != std::string::npos) {
         ErrorDetector::sleep(250);
-      } else if (err_msg.find("multiple")
+      } else if (false && err_msg.find("missing")
           != std::string::npos) {
         ErrorDetector::sleep(500);
-      } else if (err_msg.find("arguments")
+      } else if (err_msg.find("but")
           != std::string::npos) {
         ErrorDetector::sleep(750);
       } else {

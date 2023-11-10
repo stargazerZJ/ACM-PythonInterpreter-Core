@@ -468,10 +468,24 @@ PyBool PyFunc::toBool() const {
 }
 std::vector<VariablePtr> PyFunc::matchParams(FunctionCallArgs call_args) const {
   if (!(args.min_args <= call_args.args.size() && call_args.args.size() <= args.names.size())) {
-    throw std::runtime_error("TypeError: " + name + "() takes from " + std::to_string(args.min_args)
-                                 + " to " + std::to_string(args.names.size())
-                                 + " positional arguments but "
-                                 + std::to_string(call_args.args.size()) + " were given");
+    if (args.min_args > call_args.args.size()) {
+      std::string missing_args;
+      for (size_t i = call_args.args.size(); i < args.min_args; ++i) {
+        missing_args += "'" + args.names[i] + "'";
+        if (i != args.min_args - 1) {
+          missing_args += " and ";
+        }
+      }
+      throw std::runtime_error(
+          "TypeError: " + name + "() missing " + std::to_string(args.min_args - call_args.args.size())
+              + " required positional arguments: " + missing_args);
+    } else {
+      throw std::runtime_error(
+          "TypeError: " + name + "() takes from " + std::to_string(args.min_args)
+              + " to " + std::to_string(args.names.size())
+              + " positional arguments but "
+              + std::to_string(call_args.args.size()) + " were given");
+    }
   }
   std::vector<VariablePtr> param_values(args.names.size());
   for (size_t i = 0; i < call_args.args.size(); ++i) {
