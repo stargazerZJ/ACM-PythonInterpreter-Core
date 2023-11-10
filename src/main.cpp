@@ -2,7 +2,6 @@
 #include "Python3Lexer.h"
 #include "Python3Parser.h"
 #include "antlr4-runtime.h"
-#include "error_detect.h"
 #include <iostream>
 using namespace antlr4;
 int main(int argc, const char *argv[]) {
@@ -14,25 +13,6 @@ int main(int argc, const char *argv[]) {
   Python3Parser parser(&tokens);
   tree::ParseTree *tree = parser.file_input();
   EvalVisitor visitor;
-  try {
-    visitor.visit(tree);
-  } catch (std::runtime_error &e) {
-    auto err_msg = std::string(e.what());
-    std::cerr << err_msg << std::endl;
-    if (err_msg.find("TypeError: ") == 0) {
-      if (err_msg.find("missing")
-          != std::string::npos) {
-        ErrorDetector::sleep(250);
-      } else if (false && err_msg.find("missing")
-          != std::string::npos) {
-        ErrorDetector::sleep(500);
-      } else if (err_msg.find("but")
-          != std::string::npos) {
-        ErrorDetector::sleep(750);
-      } else {
-        ErrorDetector::makeRuntimeError();
-      }
-    }
-  }
+  visitor.visit(tree);
   return 0;
 }
